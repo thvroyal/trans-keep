@@ -1,0 +1,45 @@
+# BMad Workflow Status - TransKeep
+# Enterprise Method - Greenfield Project
+# Track your progress through BMM methodology phases
+
+generated: "2025-11-14"
+project: "TransKeep"
+project_type: "software"
+selected_track: "enterprise"
+field_type: "greenfield"
+workflow_path: "enterprise-greenfield.yaml"
+
+# WORKFLOW STATUS TRACKING
+# Status definitions:
+#   required: Must be completed to progress
+#   recommended: Strongly suggested but not required
+#   optional: Can be completed but not required
+#   conditional: Required only if certain conditions met
+#   {file-path}: Completed - points to artifact file
+#   skipped: Workflow was skipped
+
+workflow_status:
+  
+  # Phase 0: Discovery
+  research: docs/research.md  # agent: analyst
+  product-brief: docs/product-brief.md  # agent: analyst
+  
+  # Phase 1: Planning
+  prd: docs/PRD.md  # agent: pm
+  validate-prd: recommended  # agent: pm
+  create-design: docs/ux-design-specification.md  # agent: ux-designer
+  
+  # Phase 2: Solutioning
+  create-architecture: docs/architecture.md  # agent: architect
+  test-design: required  # agent: tea
+  validate-architecture: recommended  # agent: architect
+  solutioning-gate-check: required  # agent: architect
+  
+  # Phase 3: Implementation
+  sprint-planning: docs/sprint-plan.md  # agent: sm
+
+# NOTES
+# - Implementation phase (stories, sprints) is tracked in sprint-status.yaml
+# - Optional/recommended workflows can be marked as "skipped" if intentionally not done
+# - Update with file paths as workflows complete: "research: docs/research.md"
+

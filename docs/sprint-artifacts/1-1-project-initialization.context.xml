@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <metadata>
+    <story_id>1.1</story_id>
+    <story_key>1-1-project-initialization</story_key>
+    <title>Project Initialization</title>
+    <epic>1</epic>
+    <week>Week 1</week>
+    <duration_days>1</duration_days>
+    <owner>Lead Developer</owner>
+    <created>2025-11-14</created>
+    <status>Ready for Development</status>
+  </metadata>
+
+  <story-summary>
+    Set up the complete development environment for TransKeep MVP including frontend scaffold (React 18 + Vite), backend framework (FastAPI + Python 3.11 + uv), Docker Compose local dev setup, and CI/CD pipeline (GitHub Actions).
+  </story-summary>
+
+  <acceptance-criteria>
+    <ac id="1.1.1">
+      <title>Frontend Repository Created</title>
+      <description>React 18 + TypeScript + Vite project initialized with proper folder structure, .gitignore, and package.json</description>
+      <verification>
+        - ✅ Repo created at frontend/
+        - ✅ pnpm create vite executed successfully
+        - ✅ package.json contains React 18, TypeScript, Vite
+        - ✅ src/ and public/ folders present
+        - ✅ vite.config.ts configured
+      </verification>
+    </ac>
+
+    <ac id="1.1.2">
+      <title>Backend Repository Created with uv</title>
+      <description>FastAPI + Python 3.11 project initialized with uv package manager, pyproject.toml with core dependencies, and .gitignore</description>
+      <verification>
+        - ✅ Repo created at backend/
+        - ✅ pyproject.toml created with Python 3.11 requirement
+        - ✅ uv venv initialized (.venv created)
+        - ✅ FastAPI, Uvicorn, Pydantic in dependencies
+        - ✅ requirements.txt generated via uv pip compile
+      </verification>
+    </ac>
+
+    <ac id="1.1.3">
+      <title>Docker Compose Configuration</title>
+      <description>docker-compose.yml configured with all necessary services for local development: Frontend (Node), Backend (Python), PostgreSQL, Redis, Jaeger</description>
+      <verification>
+        - ✅ docker-compose.yml exists at project root
+        - ✅ Services: frontend, backend, postgres, redis, jaeger
+        - ✅ All services can start: docker-compose up
+        - ✅ Frontend accessible at localhost:3000
+        - ✅ Backend accessible at localhost:8000
+        - ✅ Jaeger UI at localhost:16686
+      </verification>
+    </ac>
+
+    <ac id="1.1.4">
+      <title>GitHub Actions CI/CD Pipeline</title>
+      <description>GitHub Actions workflows configured for automated testing and linting on push/PR for both frontend and backend</description>
+      <verification>
+        - ✅ .github/workflows/frontend.yml exists (runs linting + tests)
+        - ✅ .github/workflows/backend.yml exists (runs pytest + ruff + mypy)
+        - ✅ Workflows trigger on push and pull_request
+        - ✅ Both workflows pass on first push
+      </verification>
+    </ac>
+
+    <ac id="1.1.5">
+      <title>Environment Configuration</title>
+      <description>.env files configured for local development with all required API keys, database URLs, and service endpoints</description>
+      <verification>
+        - ✅ frontend/.env.local created with API_URL=http://localhost:8000
+        - ✅ backend/.env created with DATABASE_URL, REDIS_URL, etc.
+        - ✅ .env files in .gitignore (not committed)
+        - ✅ .env.example files show structure for documentation
+      </verification>
+    </ac>
+  </acceptance-criteria>
+
+  <implementation-tasks>
+    <task id="1.1.task.1" priority="HIGH">
+      <title>Create Frontend Repository Structure</title>
+      <description>
+        1. Create frontend/ directory at project root
+        2. Run: pnpm create vite@latest . --template react-ts
+        3. Install dependencies: pnpm install
+        4. Create .gitignore for Node
+        5. Verify: pnpm run dev works
+      </description>
+      <estimated_time>20 minutes</estimated_time>
+      <depends_on>none</depends_on>
+    </task>
+
+    <task id="1.1.task.2" priority="HIGH">
+      <title>Create Backend Repository with uv</title>
+      <description>
+        1. Create backend/ directory at project root
+        2. Copy pyproject.toml from docs/uv-setup-guide.md template
+        3. Run: uv venv to create .venv
+        4. Run: source .venv/bin/activate
+        5. Run: uv pip install -e . to install all dependencies
+        6. Run: uv pip compile pyproject.toml -o requirements.txt
+        7. Create FastAPI app.main module with basic route
+        8. Verify: uvicorn app.main:app --reload works
+      </description>
+      <estimated_time>25 minutes</estimated_time>
+      <depends_on>none</depends_on>
+      <resources>
+        - docs/uv-setup-guide.md (pyproject.toml template)
+        - docs/architecture.md (backend stack reference)
+      </resources>
+    </task>
+
+    <task id="1.1.task.3" priority="HIGH">
+      <title>Create docker-compose.yml</title>
+      <description>
+        1. Create docker-compose.yml at project root
+        2. Configure services:
+           - frontend: Node 20, port 3000, volume mounts for hot reload
+           - backend: Python 3.11, port 8000, volume mounts
+           - postgres: PostgreSQL 15, port 5432, default credentials
+           - redis: Redis 7, port 6379
+           - jaeger: Jaeger, port 16686 (UI), 6831/udp (collector)
+        3. Set environment variables for each service
+        4. Add health checks for critical services
+        5. Test: docker-compose up --build
+      </description>
+      <estimated_time>20 minutes</estimated_time>
+      <depends_on>1.1.task.1, 1.1.task.2</depends_on>
+      <resources>
+        - docs/architecture.md (infrastructure requirements)
+      </resources>
+    </task>
+
+    <task id="1.1.task.4" priority="MEDIUM">
+      <title>Set Up GitHub Actions Workflows</title>
+      <description>
+        1. Create .github/workflows/frontend.yml
+           - Trigger: push, pull_request
+           - Setup Node.js 20
+           - Run: pnpm install
+           - Run: pnpm run lint
+           - Run: pnpm run build
+           - Run: pnpm run test (if exists)
+        2. Create .github/workflows/backend.yml
+           - Trigger: push, pull_request
+           - Setup Python 3.11
+           - Install uv
+           - Run: uv pip install -e ".[dev]"
+           - Run: pytest
+           - Run: ruff check .
+           - Run: mypy app
+        3. Push to GitHub and verify workflows execute
+      </description>
+      <estimated_time>20 minutes</estimated_time>
+      <depends_on>1.1.task.1, 1.1.task.2</depends_on>
+      <resources>
+        - docs/uv-setup-guide.md (CI/CD section)
+      </resources>
+    </task>
+
+    <task id="1.1.task.5" priority="HIGH">
+      <title>Create Environment Files</title>
+      <description>
+        1. Create frontend/.env.local:
+           VITE_API_URL=http://localhost:8000
+           VITE_GOOGLE_CLIENT_ID=[placeholder]
+        2. Create frontend/.env.example (committed):
+           VITE_API_URL=http://localhost:8000
+           VITE_GOOGLE_CLIENT_ID=your_client_id_here
+        3. Create backend/.env:
+           DATABASE_URL=postgresql://postgres:password@postgres:5432/transkeep
+           REDIS_URL=redis://redis:6379
+           JWT_SECRET=dev_secret_key_change_in_prod
+           GOOGLE_CLIENT_ID=[placeholder]
+           GOOGLE_CLIENT_SECRET=[placeholder]
+           DEEPL_API_KEY=[placeholder]
+           CLAUDE_API_KEY=[placeholder]
+        4. Create backend/.env.example (committed):
+           [Same as above with placeholders]
+        5. Ensure both .env files in .gitignore
+      </description>
+      <estimated_time>10 minutes</estimated_time>
+      <depends_on>1.1.task.1, 1.1.task.2</depends_on>
+    </task>
+
+    <task id="1.1.task.6" priority="MEDIUM">
+      <title>Create README Files</title>
+      <description>
+        1. Create root README.md with project overview
+        2. Create frontend/README.md with frontend-specific setup
+        3. Create backend/README.md with backend-specific setup
+        Each should include:
+        - Quick start with Docker Compose
+        - Manual local setup steps (uv for backend, pnpm for frontend)
+        - Service URLs and ports
+        - Testing commands
+      </description>
+      <estimated_time>15 minutes</estimated_time>
+      <depends_on>1.1.task.1, 1.1.task.2</depends_on>
+    </task>
+  </implementation-tasks>
+
+  <testing-strategy>
+    <test id="1.1.test.1" level="Integration">
+      <description>Docker Compose Full Stack Test</description>
+      <steps>
+        1. docker-compose up --build
+        2. Wait 10 seconds for all services to start
+        3. Verify frontend loads: curl -s http://localhost:3000 | grep -q "React"
+        4. Verify backend API: curl -s http://localhost:8000/docs returns Swagger UI
+        5. Verify database: PGPASSWORD=password psql -h localhost -U postgres -d transkeep -c "SELECT 1"
+        6. Verify Redis: redis-cli -h localhost PING
+        7. Verify Jaeger: curl -s http://localhost:16686 | grep -q "Jaeger"
+      </steps>
+      <expected_result>All services healthy, accessible, and responding correctly</expected_result>
+    </test>
+
+    <test id="1.1.test.2" level="Unit">
+      <description>Backend Initialization Test</description>
+      <steps>
+        1. cd backend && source .venv/bin/activate
+        2. python -c "from app.main import app; print('✅ FastAPI app imports successfully')"
+        3. pytest -v (should pass any existing tests)
+      </steps>
+      <expected_result>FastAPI app imports and any tests pass</expected_result>
+    </test>
+
+    <test id="1.1.test.3" level="Unit">
+      <description>Frontend Build Test</description>
+      <steps>
+        1. cd frontend
+        2. pnpm run build
+        3. ls -la dist/ (should contain index.html and assets)
+      </steps>
+      <expected_result>Production build completes without errors</expected_result>
+    </test>
+  </testing-strategy>
+
+  <definition-of-done>
+    - ✅ All acceptance criteria met (AC 1.1.1 - 1.1.5)
+    - ✅ All tasks completed (1.1.task.1 - 1.1.task.6)
+    - ✅ All tests passing (1.1.test.1 - 1.1.test.3)
+    - ✅ docker-compose up starts all services without errors
+    - ✅ Frontend accessible at localhost:3000
+    - ✅ Backend API at localhost:8000/docs
+    - ✅ GitHub Actions workflows passing
+    - ✅ Code committed to main branch
+    - ✅ Ready for Story 1.2 (Database & Infrastructure Setup)
+  </definition-of-done>
+
+  <context-references>
+    <reference type="architecture">docs/architecture.md</reference>
+    <reference type="sprint-plan">docs/sprint-plan.md (Week 1, Story 1.1)</reference>
+    <reference type="setup-guide">docs/uv-setup-guide.md</reference>
+    <reference type="tech-decisions">docs/architecture.md (Section 1-3: Tech Stack)</reference>
+  </context-references>
+
+  <decision-record>
+    <decision>
+      <question>Package Manager for Frontend?</question>
+      <answer>pnpm - fast, space-efficient, strict dependency management</answer>
+      <rationale>Industry standard for React projects, works perfectly with Vite</rationale>
+    </decision>
+    <decision>
+      <question>Package Manager for Backend?</question>
+      <answer>uv - ultra-fast Python package management</answer>
+      <rationale>5-20x faster than pip, deterministic, production-ready</rationale>
+    </decision>
+    <decision>
+      <question>Container Orchestration?</question>
+      <answer>Docker Compose (local dev), AWS ECS (production)</answer>
+      <rationale>Simple for local development, scales to production</rationale>
+    </decision>
+    <decision>
+      <question>CI/CD Platform?</question>
+      <answer>GitHub Actions</answer>
+      <rationale>Free, built into GitHub, no external dependencies</rationale>
+    </decision>
+  </decision-record>
+
+  <blockers-and-dependencies>
+    <blocker type="external">
+      None - all tools available
+    </blocker>
+    <dependency type="sequential">
+      Task 1.1.task.3 (Docker Compose) depends on tasks 1.1.task.1 and 1.1.task.2 completing first
+    </dependency>
+  </blockers-and-dependencies>
+
+</story-context>
+

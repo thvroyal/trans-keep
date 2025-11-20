@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-lock.yaml* package-lock.json* npm-shrinkwrap.json* ./
+
+# Install dependencies (use npm if pnpm-lock not available)
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Expose dev server port
+EXPOSE 5173
+
+# Run dev server
+CMD ["npm", "run", "dev"]
+
