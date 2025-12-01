@@ -1,0 +1,240 @@
+<story-context id="2-2-pdf-extraction" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.2</storyId>
+    <title>PDF Extraction with PyMuPDF</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-2-pdf-extraction.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>System</asA>
+    <iWant>Extract text from PDF files while preserving exact layout information</iWant>
+    <soThat>The translation can be reconstructed with identical formatting to the original document</soThat>
+    
+    <tasks>
+      <task id="1" title="Create PDF Extraction Module" estimate="2h">
+        <subtask>Install PyMuPDF and dependencies</subtask>
+        <subtask>Create extract_text_with_layout() function</subtask>
+        <subtask>Return structured data (blocks with coordinates)</subtask>
+        <subtask>Handle text rotation and scaling</subtask>
+        <subtask>Test with various PDF formats</subtask>
+      </task>
+      
+      <task id="2" title="Implement Block Extraction" estimate="2h">
+        <subtask>Extract individual text blocks</subtask>
+        <subtask>Capture block coordinates (x, y, width, height)</subtask>
+        <subtask>Preserve formatting (bold, italic, font size)</subtask>
+        <subtask>Handle multi-line blocks</subtask>
+        <subtask>Create Block data structure</subtask>
+      </task>
+      
+      <task id="3" title="Performance Optimization" estimate="2h">
+        <subtask>Implement multi-threading for page processing</subtask>
+        <subtask>Cache results in Redis for 24 hours</subtask>
+        <subtask>Implement progress tracking</subtask>
+        <subtask>Benchmark extraction times</subtask>
+        <subtask>Optimize for large PDFs</subtask>
+      </task>
+      
+      <task id="4" title="Handle Edge Cases" estimate="1.5h">
+        <subtask>Detect scanned PDFs (no embedded text)</subtask>
+        <subtask>Handle corrupted PDF sections</subtask>
+        <subtask>Skip empty pages</subtask>
+        <subtask>Handle different text encodings</subtask>
+        <subtask>Log warnings for issues</subtask>
+      </task>
+      
+      <task id="5" title="Integrate with Upload Flow" estimate="2h">
+        <subtask>Create extraction Celery task</subtask>
+        <subtask>Trigger after file stored in S3</subtask>
+        <subtask>Update translation status</subtask>
+        <subtask>Store blocks in database</subtask>
+        <subtask>Handle extraction failures</subtask>
+      </task>
+      
+      <task id="6" title="Performance Testing" estimate="1.5h">
+        <subtask>Test with 10-page PDF</subtask>
+        <subtask>Test with 100-page PDF</subtask>
+        <subtask>Test with 500-page PDF</subtask>
+        <subtask>Measure timing at each step</subtask>
+        <subtask>Verify memory usage</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-2.2.1" title="PDF Text Extraction">
+      <requirement>extract_text_with_layout() function working</requirement>
+      <requirement>Returns text blocks with coordinates</requirement>
+      <requirement>Captures page and block numbers</requirement>
+      <requirement>Handles multi-line text blocks</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.2.2" title="Layout Preservation">
+      <requirement>Text block positions captured</requirement>
+      <requirement>Font information stored</requirement>
+      <requirement>Text rotation handled</requirement>
+      <requirement>Column detection working</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.2.3" title="Performance">
+      <requirement>10-page PDF: &lt;1 second</requirement>
+      <requirement>100-page PDF: &lt;5 seconds</requirement>
+      <requirement>500-page PDF: &lt;20 seconds</requirement>
+      <requirement>Redis caching for extracted data</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.2.4" title="Error Handling">
+      <requirement>Scanned PDFs detected and flagged</requirement>
+      <requirement>Corrupted PDFs handled gracefully</requirement>
+      <requirement>Large PDFs don't crash system</requirement>
+      <requirement>Clear error messages</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.2.5" title="Integration">
+      <requirement>Integrated with upload flow</requirement>
+      <requirement>Extraction triggered after upload</requirement>
+      <requirement>Results cached in Redis</requirement>
+      <requirement>Ready for translation pipeline</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 4.2 - PDF Processing Pipeline</section>
+        <snippet>PyMuPDF for extraction, block-level processing, coordinate preservation, Redis caching.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR21-30: Translation Processing</section>
+        <snippet>Extract text with layout preservation, handle multi-column documents, support 500+ pages.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-2-tech-stack.md</path>
+        <title>Epic 2 Tech Stack</title>
+        <section>PDF Processing Technologies</section>
+        <snippet>PyMuPDF (fitz) for extraction, block coordinates, font info, rotation handling.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/services/s3_service.py</path>
+        <kind>service</kind>
+        <symbol>S3Service</symbol>
+        <reason>S3 service from Story 2.1 - download PDF for extraction</reason>
+      </file>
+      <file>
+        <path>backend/app/models/translation.py</path>
+        <kind>model</kind>
+        <symbol>Translation</symbol>
+        <reason>Translation model - update status during extraction</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="PyMuPDF" version="1.23.7">PDF extraction library (fitz)</package>
+        <package name="redis" version="5.0.1">Redis client for caching</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="performance">10-page PDF extraction must complete in &lt;1 second</constraint>
+    <constraint type="performance">Process pages in parallel using ThreadPoolExecutor</constraint>
+    <constraint type="performance">Cache extracted blocks in Redis for 24 hours</constraint>
+    <constraint type="memory">Stream large PDFs page-by-page to avoid memory issues</constraint>
+    <constraint type="data">Store coordinates as normalized percentages (0-100)</constraint>
+    <constraint type="data">Preserve font_size, font_name, bold, italic attributes</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>PDF Service</name>
+      <kind>service</kind>
+      <signature>
+        class PDFService:
+            def extract_text_with_layout(pdf_path: str) -> List[Block]
+            def detect_scanned_pdf(pdf_path: str) -> bool
+            def get_page_count(pdf_path: str) -> int
+        
+        @dataclass
+        class Block:
+            page: int
+            block_id: int
+            text: str
+            coordinates: Coordinates
+            font_size: float
+            font_name: str
+            is_bold: bool
+            is_italic: bool
+            rotation: float
+        
+        @dataclass
+        class Coordinates:
+            x: float  # percentage 0-100
+            y: float
+            width: float
+            height: float
+      </signature>
+      <path>backend/app/services/pdf_service.py</path>
+    </interface>
+    <interface>
+      <name>Extract PDF Task</name>
+      <kind>Celery task</kind>
+      <signature>
+        @celery_app.task(bind=True, max_retries=3)
+        def extract_pdf_task(self, job_id: str, s3_key: str) -> List[Block]
+      </signature>
+      <path>backend/app/tasks/extract_pdf.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest with sample PDF fixtures. Test with various PDF types (simple, multi-column, rotated).
+      Benchmark extraction times. Verify coordinate accuracy.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_pdf_extraction.py</location>
+      <location>backend/tests/fixtures/sample_pdfs/</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-2.2.1">
+        <test>Test extraction returns blocks with text</test>
+        <test>Test blocks have page and block_id</test>
+        <test>Test multi-line blocks are captured correctly</test>
+      </idea>
+      <idea acId="AC-2.2.2">
+        <test>Test coordinates are accurate</test>
+        <test>Test font information is preserved</test>
+        <test>Test rotated text is handled</test>
+      </idea>
+      <idea acId="AC-2.2.3">
+        <test>Benchmark 10-page PDF extraction time</test>
+        <test>Benchmark 100-page PDF extraction time</test>
+        <test>Test Redis caching works</test>
+      </idea>
+      <idea acId="AC-2.2.4">
+        <test>Test scanned PDF detection</test>
+        <test>Test corrupted PDF handling</test>
+        <test>Test empty page handling</test>
+      </idea>
+      <idea acId="AC-2.2.5">
+        <test>Test Celery task triggers correctly</test>
+        <test>Test status updates during extraction</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

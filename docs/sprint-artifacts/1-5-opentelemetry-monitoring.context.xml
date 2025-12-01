@@ -1,0 +1,272 @@
+<story-context id="1-5-opentelemetry-monitoring" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.5</storyId>
+    <title>OpenTelemetry & Monitoring Setup</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-5-opentelemetry-monitoring.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Developer</asA>
+    <iWant>Implement distributed tracing and observability using OpenTelemetry protocol with Jaeger for local development</iWant>
+    <soThat>I can debug issues, monitor performance, and have a foundation for production CloudWatch integration</soThat>
+    
+    <tasks>
+      <task id="1" title="Set Up Backend Otel" estimate="1.5h">
+        <subtask>Install: opentelemetry-api, opentelemetry-sdk, opentelemetry-exporter-jaeger</subtask>
+        <subtask>Install: opentelemetry-instrumentation-fastapi</subtask>
+        <subtask>Create otel_config.py with tracer setup</subtask>
+        <subtask>Configure Jaeger exporter</subtask>
+        <subtask>Add middleware to FastAPI</subtask>
+        <subtask>Test with curl request</subtask>
+      </task>
+      
+      <task id="2" title="Set Up Frontend Otel" estimate="1.5h">
+        <subtask>Install: @opentelemetry/api, @opentelemetry/sdk-web</subtask>
+        <subtask>Install: @opentelemetry/auto-instrumentations-web</subtask>
+        <subtask>Install: @opentelemetry/exporter-trace-otlp-http</subtask>
+        <subtask>Create otelConfig.ts</subtask>
+        <subtask>Configure Jaeger exporter</subtask>
+        <subtask>Initialize in main.tsx</subtask>
+      </task>
+      
+      <task id="3" title="Instrument Endpoints" estimate="2h">
+        <subtask>Add trace decorators to FastAPI routers</subtask>
+        <subtask>Add trace context to request/response</subtask>
+        <subtask>Trace database queries</subtask>
+        <subtask>Trace external API calls (DeepL, Claude)</subtask>
+        <subtask>Test trace output</subtask>
+      </task>
+      
+      <task id="4" title="Configure Logging" estimate="1.5h">
+        <subtask>Create structured logger utility</subtask>
+        <subtask>Add trace ID to all logs</subtask>
+        <subtask>Implement log levels</subtask>
+        <subtask>Add context information (user_id, job_id)</subtask>
+        <subtask>Test logging output</subtask>
+      </task>
+      
+      <task id="5" title="Verify Jaeger Integration" estimate="1h">
+        <subtask>Start docker-compose with Jaeger</subtask>
+        <subtask>Make requests to backend</subtask>
+        <subtask>Verify traces in Jaeger UI</subtask>
+        <subtask>Verify end-to-end tracing</subtask>
+        <subtask>Check performance waterfall</subtask>
+      </task>
+      
+      <task id="6" title="Write Documentation" estimate="1h">
+        <subtask>Document how to add tracing to new endpoints</subtask>
+        <subtask>Document how to view traces in Jaeger</subtask>
+        <subtask>Document structured logging format</subtask>
+        <subtask>Add troubleshooting guide</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-1.5.1" title="Backend Otel Instrumentation">
+      <requirement>OpenTelemetry FastAPI instrumentation installed</requirement>
+      <requirement>Jaeger exporter configured</requirement>
+      <requirement>All FastAPI endpoints traced</requirement>
+      <requirement>Database queries traced</requirement>
+      <requirement>Error traces captured</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.5.2" title="Frontend Otel Instrumentation">
+      <requirement>OpenTelemetry Web SDK installed</requirement>
+      <requirement>HTTP request tracing working</requirement>
+      <requirement>Error tracing captured</requirement>
+      <requirement>Traces sent to Jaeger collector</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.5.3" title="Jaeger Integration">
+      <requirement>Jaeger running in docker-compose</requirement>
+      <requirement>Traces visible in Jaeger UI (localhost:16686)</requirement>
+      <requirement>Trace IDs logged in application logs</requirement>
+      <requirement>Requests tracked end-to-end (frontend → backend)</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.5.4" title="Logging Structure">
+      <requirement>Structured JSON logging in backend</requirement>
+      <requirement>Log levels: DEBUG, INFO, WARN, ERROR</requirement>
+      <requirement>Trace ID included in every log</requirement>
+      <requirement>User context included in logs</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.5.5" title="Monitoring Dashboard Ready">
+      <requirement>Jaeger UI accessible</requirement>
+      <requirement>Can search traces by service</requirement>
+      <requirement>Can filter by trace ID</requirement>
+      <requirement>Performance metrics visible</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 9.2 - Logging Strategy (OpenTelemetry Protocol)</section>
+        <snippet>OpenTelemetry implementation with Jaeger exporter, structured JSON logging with trace IDs, CloudWatch integration via Otel Collector.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 9.1 - Key Metrics to Track</section>
+        <snippet>Business metrics (DAU, translations), technical metrics (response times, error rates), system metrics (CPU, memory).</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-1-tech-stack.md</path>
+        <title>Epic 1 Tech Stack</title>
+        <section>Observability Technologies</section>
+        <snippet>OpenTelemetry SDK, Jaeger exporter, structured logging with trace correlation.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/main.py</path>
+        <kind>application</kind>
+        <symbol>FastAPI app</symbol>
+        <reason>Main app where Otel middleware will be registered</reason>
+      </file>
+      <file>
+        <path>backend/pyproject.toml</path>
+        <kind>config</kind>
+        <symbol>dependencies</symbol>
+        <reason>Already includes opentelemetry packages</reason>
+      </file>
+      <file>
+        <path>docker-compose.yml</path>
+        <kind>infrastructure</kind>
+        <symbol>services</symbol>
+        <reason>Add Jaeger service for trace collection</reason>
+      </file>
+      <file>
+        <path>frontend/src/main.tsx</path>
+        <kind>entry</kind>
+        <symbol>main</symbol>
+        <reason>Initialize Otel Web SDK before app renders</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="opentelemetry-api" version="1.21.0">Core Otel API</package>
+        <package name="opentelemetry-sdk" version="1.21.0">Otel SDK implementation</package>
+        <package name="opentelemetry-exporter-jaeger" version="1.21.0">Jaeger trace exporter</package>
+        <package name="opentelemetry-instrumentation-fastapi" version="0.42b0">FastAPI auto-instrumentation</package>
+        <package name="opentelemetry-instrumentation-sqlalchemy" version="0.42b0">SQLAlchemy auto-instrumentation</package>
+        <package name="opentelemetry-instrumentation-requests" version="0.42b0">HTTP client instrumentation</package>
+      </python>
+      <npm>
+        <package name="@opentelemetry/api" version="^1.7.0">Core Otel API</package>
+        <package name="@opentelemetry/sdk-web" version="^0.46.0">Web SDK</package>
+        <package name="@opentelemetry/auto-instrumentations-web" version="^0.35.0">Auto instrumentation</package>
+        <package name="@opentelemetry/exporter-trace-otlp-http" version="^0.46.0">OTLP HTTP exporter</package>
+      </npm>
+      <infrastructure>
+        <service name="Jaeger" version="latest">Distributed tracing backend</service>
+      </infrastructure>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="pattern">Use OpenTelemetry protocol for vendor-agnostic observability</constraint>
+    <constraint type="pattern">All logs must include trace_id and span_id</constraint>
+    <constraint type="pattern">Use structured JSON logging format</constraint>
+    <constraint type="pattern">Log levels: DEBUG (dev only), INFO (milestones), WARNING (recoverable), ERROR (problems)</constraint>
+    <constraint type="security">Never log sensitive data (tokens, passwords, PII)</constraint>
+    <constraint type="security">Sanitize user input before logging</constraint>
+    <constraint type="performance">Otel overhead should be minimal (&lt;5% latency increase)</constraint>
+    <constraint type="performance">Use batch span processor for efficiency</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Otel Config</name>
+      <kind>configuration</kind>
+      <signature>
+        def init_telemetry(service_name: str, jaeger_endpoint: str) -> TracerProvider
+        def get_tracer() -> Tracer
+      </signature>
+      <path>backend/app/otel_config.py</path>
+    </interface>
+    <interface>
+      <name>Structured Logger</name>
+      <kind>utility</kind>
+      <signature>
+        class Logger:
+            def debug(msg: str, **context)
+            def info(msg: str, **context)
+            def warning(msg: str, **context)
+            def error(msg: str, exc: Exception = None, **context)
+        
+        # Output format:
+        {
+          "timestamp": "ISO8601",
+          "level": "INFO",
+          "service": "backend",
+          "trace_id": "hex",
+          "span_id": "hex",
+          "user_id": "uuid",
+          "message": "string",
+          "context": {}
+        }
+      </signature>
+      <path>backend/app/logger.py</path>
+    </interface>
+    <interface>
+      <name>Frontend Otel Config</name>
+      <kind>configuration</kind>
+      <signature>
+        export function initTelemetry(serviceName: string, collectorUrl: string): void
+      </signature>
+      <path>frontend/src/otelConfig.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest for backend Otel tests. Mock Jaeger exporter for unit tests.
+      Integration tests should verify traces appear in Jaeger UI.
+      Test logging output format matches specification.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_otel.py</location>
+      <location>backend/tests/test_logger.py</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-1.5.1">
+        <test>Test tracer provider initializes correctly</test>
+        <test>Test FastAPI middleware creates spans</test>
+        <test>Test database queries are traced</test>
+        <test>Test errors are captured in traces</test>
+      </idea>
+      <idea acId="AC-1.5.2">
+        <test>Test frontend Otel SDK initializes</test>
+        <test>Test HTTP requests create spans</test>
+      </idea>
+      <idea acId="AC-1.5.3">
+        <test>Test Jaeger receives traces from backend</test>
+        <test>Test trace context propagates frontend → backend</test>
+      </idea>
+      <idea acId="AC-1.5.4">
+        <test>Test log output is valid JSON</test>
+        <test>Test trace_id is included in logs</test>
+        <test>Test log levels filter correctly</test>
+        <test>Test sensitive data is not logged</test>
+      </idea>
+      <idea acId="AC-1.5.5">
+        <test>Test Jaeger UI is accessible</test>
+        <test>Test traces can be searched by service name</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

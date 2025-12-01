@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TransKeep - Design Direction Mockups</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background: #FAFAFA;
+      --foreground: #0A0A0A;
+      --card: #FFFFFF;
+      --muted: #F4F4F5;
+      --muted-fg: #71717A;
+      --border: #E4E4E7;
+      --primary: #0066FF;
+      --primary-fg: #FFFFFF;
+      --accent: #F0F7FF;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --destructive: #EF4444;
+      --highlight: #DBEAFE;
+      --highlight-border: #3B82F6;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #18181B;
+      color: #FAFAFA;
+      line-height: 1.6;
+    }
+    
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #09090B;
+      border-bottom: 1px solid #27272A;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+    
+    .nav-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .nav-controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .nav-btn {
+      background: #27272A;
+      border: 1px solid #3F3F46;
+      color: #FAFAFA;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    
+    .nav-btn:hover {
+      background: #3F3F46;
+    }
+    
+    .nav-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    /* Main Content */
+    .main {
+      padding-top: 80px;
+      min-height: 100vh;
+    }
+    
+    /* Direction Selector */
+    .direction-selector {
+      display: flex;
+      gap: 12px;
+      padding: 24px;
+      overflow-x: auto;
+      background: #09090B;
+      border-bottom: 1px solid #27272A;
+    }
+    
+    .direction-thumb {
+      flex-shrink: 0;
+      width: 160px;
+      background: #27272A;
+      border: 2px solid #3F3F46;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    
+    .direction-thumb:hover {
+      border-color: #52525B;
+    }
+    
+    .direction-thumb.active {
+      border-color: var(--primary);
+      background: #1E3A5F;
+    }
+    
+    .direction-thumb-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .direction-thumb-desc {
+      font-size: 11px;
+      color: #A1A1AA;
+    }
+    
+    /* Mockup Container */
+    .mockup-container {
+      padding: 24px;
+    }
+    
+    .mockup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    
+    .mockup-info h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .mockup-info p {
+      color: #A1A1AA;
+      font-size: 14px;
+    }
+    
+    .mockup-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .tag {
+      background: #27272A;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: #A1A1AA;
+    }
+    
+    /* Mockup Frame */
+    .mockup-frame {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    }
+    
+    /* Direction 1: Spacious & Minimal */
+    .direction-1 .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+    
+    .direction-1 .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--foreground);
+    }
+    
+    .direction-1 .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .direction-1 .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .direction-1 .btn-primary {
+      background: var(--primary);
+      color: var(--primary-fg);
+    }
+    
+    .direction-1 .btn-ghost {
+      background: transparent;
+      color: var(--muted-fg);
+    }
+    
+    .direction-1 .review-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 500px;
+      background: var(--background);
+    }
+    
+    .direction-1 .panel {
+      padding: 24px;
+      overflow: auto;
+    }
+    
+    .direction-1 .panel-header {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted-fg);
+      margin-bottom: 16px;
+    }
+    
+    .direction-1 .panel-left {
+      border-right: 1px solid var(--border);
+    }
+    
+    .direction-1 .text-block {
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--foreground);
+      transition: all 0.1s ease;
+    }
+    
+    .direction-1 .text-block:hover {
+      background: var(--highlight);
+      border-left: 3px solid var(--highlight-border);
+    }
+    
+    .direction-1 .refinement-panel {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 20px 24px;
+    }
+    
+    .direction-1 .tone-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .direction-1 .tone-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted-fg);
+      cursor: pointer;
+    }
+    
+    .direction-1 .tone-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    .direction-1 .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    
+    /* Direction 2: Dense Dashboard */
+    .direction-2 .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #1E293B;
+      color: white;
+    }
+    
+    .direction-2 .logo {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    
+    .direction-2 .toolbar {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .direction-2 .tool-btn {
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    
+    .direction-2 .main-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr 1fr 280px;
+      height: 500px;
+    }
+    
+    .direction-2 .sidebar {
+      background: #F1F5F9;
+      padding: 16px;
+      border-right: 1px solid #E2E8F0;
+    }
+    
+    .direction-2 .sidebar-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #64748B;
+      margin-bottom: 12px;
+    }
+    
+    .direction-2 .nav-item {
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #334155;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+    
+    .direction-2 .nav-item.active {
+      background: white;
+      font-weight: 500;
+    }
+    
+    .direction-2 .panel {
+      padding: 16px;
+      overflow: auto;
+      background: white;
+    }
+    
+    .direction-2 .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+    
+    .direction-2 .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0F172A;
+    }
+    
+    .direction-2 .panel-left {
+      border-right: 1px solid #E2E8F0;
+    }
+    
+    .direction-2 .text-block {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #334155;
+      border-radius: 4px;
+    }
+    
+    .direction-2 .text-block:hover {
+      background: #DBEAFE;
+    }
+    
+    .direction-2 .right-panel {
+      background: #F8FAFC;
+      padding: 16px;
+      border-left: 1px solid #E2E8F0;
+    }
+    
+    .direction-2 .control-group {
+      margin-bottom: 20px;
+    }
+    
+    .direction-2 .control-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #64748B;
+      margin-bottom: 8px;
+    }
+    
+    .direction-2 .tone-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    
+    .direction-2 .tone-option {
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+      background: white;
+      border: 1px solid #E2E8F0;
+      cursor: pointer;
+    }
+    
+    .direction-2 .tone-option.active {
+      background: #0066FF;
+      border-color: #0066FF;
+      color: white;
+    }
+    
+    /* Direction 3: Card-Based */
+    .direction-3 .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 32px;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .direction-3 .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #4F46E5;
+    }
+    
+    .direction-3 .main-content {
+      padding: 32px;
+      background: #F5F3FF;
+      min-height: 500px;
+    }
+    
+    .direction-3 .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .direction-3 .doc-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .direction-3 .card-header {
+      padding: 16px 20px;
+      background: #EEF2FF;
+      border-bottom: 1px solid #E0E7FF;
+    }
+    
+    .direction-3 .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1E1B4B;
+    }
+    
+    .direction-3 .card-body {
+      padding: 20px;
+      height: 300px;
+      overflow: auto;
+    }
+    
+    .direction-3 .text-block {
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #1E1B4B;
+      background: #FAFAFA;
+    }
+    
+    .direction-3 .text-block:hover {
+      background: #C7D2FE;
+    }
+    
+    .direction-3 .control-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .direction-3 .control-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1E1B4B;
+      margin-bottom: 16px;
+    }
+    
+    .direction-3 .tone-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    
+    .direction-3 .tone-pill {
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 14px;
+      background: #EEF2FF;
+      border: 2px solid transparent;
+      color: #4F46E5;
+      cursor: pointer;
+    }
+    
+    .direction-3 .tone-pill.active {
+      background: #4F46E5;
+      color: white;
+    }
+    
+    .direction-3 .btn-download {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      background: #4F46E5;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    
+    /* Direction 4: Floating Panels */
+    .direction-4 {
+      position: relative;
+    }
+    
+    .direction-4 .canvas {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 600px;
+      padding: 24px;
+      position: relative;
+    }
+    
+    .direction-4 .floating-header {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      right: 24px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
+    .direction-4 .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1E1B4B;
+    }
+    
+    .direction-4 .doc-panels {
+      display: flex;
+      gap: 20px;
+      position: absolute;
+      top: 100px;
+      left: 24px;
+      right: 24px;
+      bottom: 120px;
+    }
+    
+    .direction-4 .doc-panel {
+      flex: 1;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .direction-4 .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      font-size: 14px;
+      font-weight: 600;
+      color: #1E1B4B;
+    }
+    
+    .direction-4 .panel-body {
+      padding: 20px;
+      height: 280px;
+      overflow: auto;
+    }
+    
+    .direction-4 .text-block {
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #1E1B4B;
+    }
+    
+    .direction-4 .text-block:hover {
+      background: rgba(102, 126, 234, 0.15);
+    }
+    
+    .direction-4 .floating-controls {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 12px 24px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
+    .direction-4 .tone-chip {
+      padding: 8px 16px;
+      border-radius: 16px;
+      font-size: 13px;
+      background: #F3F4F6;
+      color: #374151;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .direction-4 .tone-chip.active {
+      background: #667eea;
+      color: white;
+    }
+    
+    .direction-4 .btn-download {
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      background: #1E1B4B;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    
+    /* Hide all directions by default */
+    .direction {
+      display: none;
+    }
+    
+    .direction.active {
+      display: block;
+    }
+    
+    /* Footer */
+    footer {
+      padding: 32px;
+      text-align: center;
+      color: #71717A;
+      font-size: 14px;
+    }
+    
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-title">🎨 TransKeep Design Directions</div>
+    <div class="nav-controls">
+      <button class="nav-btn" onclick="toggleCompare()">Compare Mode</button>
+    </div>
+  </nav>
+  
+  <main class="main">
+    <div class="direction-selector">
+      <div class="direction-thumb active" onclick="showDirection(1)">
+        <div class="direction-thumb-title">1. Spacious & Minimal</div>
+        <div class="direction-thumb-desc">Clean, premium, Figma-like</div>
+      </div>
+      <div class="direction-thumb" onclick="showDirection(2)">
+        <div class="direction-thumb-title">2. Dense Dashboard</div>
+        <div class="direction-thumb-desc">Information-rich, power users</div>
+      </div>
+      <div class="direction-thumb" onclick="showDirection(3)">
+        <div class="direction-thumb-title">3. Card-Based</div>
+        <div class="direction-thumb-desc">Friendly, approachable</div>
+      </div>
+      <div class="direction-thumb" onclick="showDirection(4)">
+        <div class="direction-thumb-title">4. Floating Panels</div>
+        <div class="direction-thumb-desc">Creative, distinctive</div>
+      </div>
+    </div>
+    
+    <div class="mockup-container">
+      <!-- Direction 1: Spacious & Minimal -->
+      <div class="direction direction-1 active" id="direction-1">
+        <div class="mockup-header">
+          <div class="mockup-info">
+            <h2>Direction 1: Spacious & Minimal</h2>
+            <p>Clean, premium aesthetic inspired by Figma. Maximum whitespace, minimal chrome. Content dominates.</p>
+          </div>
+          <div class="mockup-tags">
+            <span class="tag">Premium</span>
+            <span class="tag">Minimal</span>
+            <span class="tag">Professional</span>
+            <span class="tag">✓ Recommended</span>
+          </div>
+        </div>
+        
+        <div class="mockup-frame">
+          <div class="app-header">
+            <div class="logo">TransKeep</div>
+            <div class="header-actions">
+              <button class="btn btn-ghost">Help</button>
+              <button class="btn btn-primary">Download PDF</button>
+            </div>
+          </div>
+          
+          <div class="review-container">
+            <div class="panel panel-left">
+              <div class="panel-header">Original</div>
+              <div class="text-block">The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet.</div>
+              <div class="text-block">In the heart of the ancient forest, where sunlight barely penetrates the dense canopy, there lived a wise old owl.</div>
+              <div class="text-block">Technology has transformed the way we communicate, work, and live our daily lives in the modern era.</div>
+            </div>
+            <div class="panel panel-right">
+              <div class="panel-header">Translated (Japanese)</div>
+              <div class="text-block">素早い茶色の狐が怠惰な犬を飛び越える。この文にはアルファベットのすべての文字が含まれています。</div>
+              <div class="text-block">太陽の光がほとんど届かない古代の森の奥深くに、賢い老フクロウが住んでいました。</div>
+              <div class="text-block">テクノロジーは、現代において私たちのコミュニケーション、仕事、日常生活の方法を変革しました。</div>
+            </div>
+          </div>
+          
+          <div class="refinement-panel">
+            <div class="tone-selector">
+              <button class="tone-btn">Formal</button>
+              <button class="tone-btn">Casual</button>
+              <button class="tone-btn active">Creative</button>
+              <button class="tone-btn">Technical</button>
+              <button class="tone-btn">Academic</button>
+            </div>
+            <div class="actions">
+              <button class="btn btn-ghost">Edit Selected</button>
+              <button class="btn btn-primary">Download PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Direction 2: Dense Dashboard -->
+      <div class="direction direction-2" id="direction-2">
+        <div class="mockup-header">
+          <div class="mockup-info">
+            <h2>Direction 2: Dense Dashboard</h2>
+            <p>Information-rich interface for power users. All controls visible at once. Efficient workspace.</p>
+          </div>
+          <div class="mockup-tags">
+            <span class="tag">Power User</span>
+            <span class="tag">Dense</span>
+            <span class="tag">Efficient</span>
+          </div>
+        </div>
+        
+        <div class="mockup-frame">
+          <div class="app-header">
+            <div class="logo">TransKeep</div>
+            <div class="toolbar">
+              <button class="tool-btn">🔗 Sync</button>
+              <button class="tool-btn">🔍 Zoom</button>
+              <button class="tool-btn">⚙️ Settings</button>
+              <button class="tool-btn">⬇️ Download</button>
+            </div>
+          </div>
+          
+          <div class="main-layout">
+            <div class="sidebar">
+              <div class="sidebar-title">Documents</div>
+              <div class="nav-item active">document.pdf</div>
+              <div class="nav-item">report.pdf</div>
+              <div class="nav-item">+ Upload New</div>
+            </div>
+            
+            <div class="panel panel-left">
+              <div class="panel-header">
+                <span class="panel-title">Original (English)</span>
+              </div>
+              <div class="text-block">The quick brown fox jumps over the lazy dog.</div>
+              <div class="text-block">In the heart of the ancient forest, where sunlight barely penetrates the dense canopy.</div>
+              <div class="text-block">Technology has transformed the way we communicate.</div>
+            </div>
+            
+            <div class="panel panel-right">
+              <div class="panel-header">
+                <span class="panel-title">Translated (Japanese)</span>
+              </div>
+              <div class="text-block">素早い茶色の狐が怠惰な犬を飛び越える。</div>
+              <div class="text-block">太陽の光がほとんど届かない古代の森の奥深くに。</div>
+              <div class="text-block">テクノロジーは私たちのコミュニケーションを変革しました。</div>
+            </div>
+            
+            <div class="right-panel">
+              <div class="control-group">
+                <div class="control-label">Tone</div>
+                <div class="tone-grid">
+                  <div class="tone-option">Formal</div>
+                  <div class="tone-option">Casual</div>
+                  <div class="tone-option active">Creative</div>
+                  <div class="tone-option">Technical</div>
+                </div>
+              </div>
+              
+              <div class="control-group">
+                <div class="control-label">Custom Tone</div>
+                <input type="text" placeholder="Describe tone..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #E2E8F0; font-size: 12px;">
+              </div>
+              
+              <div class="control-group">
+                <div class="control-label">Actions</div>
+                <button style="width: 100%; padding: 10px; border-radius: 4px; background: #0066FF; color: white; border: none; font-size: 13px; cursor: pointer;">Download PDF</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Direction 3: Card-Based -->
+      <div class="direction direction-3" id="direction-3">
+        <div class="mockup-header">
+          <div class="mockup-info">
+            <h2>Direction 3: Card-Based</h2>
+            <p>Friendly, approachable design with distinct card containers. Clear visual separation.</p>
+          </div>
+          <div class="mockup-tags">
+            <span class="tag">Friendly</span>
+            <span class="tag">Approachable</span>
+            <span class="tag">Clear</span>
+          </div>
+        </div>
+        
+        <div class="mockup-frame">
+          <div class="app-header">
+            <div class="logo">TransKeep</div>
+            <div style="display: flex; gap: 12px;">
+              <button style="padding: 8px 16px; border-radius: 8px; border: none; background: #EEF2FF; color: #4F46E5; font-size: 14px; cursor: pointer;">Help</button>
+              <button style="padding: 8px 16px; border-radius: 8px; border: none; background: #4F46E5; color: white; font-size: 14px; cursor: pointer;">Account</button>
+            </div>
+          </div>
+          
+          <div class="main-content">
+            <div class="cards-grid">
+              <div class="doc-card">
+                <div class="card-header">
+                  <div class="card-title">📄 Original Document</div>
+                </div>
+                <div class="card-body">
+                  <div class="text-block">The quick brown fox jumps over the lazy dog. This sentence contains every letter.</div>
+                  <div class="text-block">In the heart of the ancient forest, where sunlight barely penetrates the dense canopy.</div>
+                  <div class="text-block">Technology has transformed the way we communicate, work, and live.</div>
+                </div>
+              </div>
+              
+              <div class="doc-card">
+                <div class="card-header">
+                  <div class="card-title">🌐 Translated (Japanese)</div>
+                </div>
+                <div class="card-body">
+                  <div class="text-block">素早い茶色の狐が怠惰な犬を飛び越える。この文にはすべての文字が含まれています。</div>
+                  <div class="text-block">太陽の光がほとんど届かない古代の森の奥深くに。</div>
+                  <div class="text-block">テクノロジーは私たちのコミュニケーション、仕事、生活を変革しました。</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-card">
+              <div class="control-title">🎨 Choose Translation Tone</div>
+              <div class="tone-pills">
+                <button class="tone-pill">Formal</button>
+                <button class="tone-pill">Casual</button>
+                <button class="tone-pill active">Creative</button>
+                <button class="tone-pill">Technical</button>
+                <button class="tone-pill">Academic</button>
+              </div>
+              <button class="btn-download">⬇️ Download Translated PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Direction 4: Floating Panels -->
+      <div class="direction direction-4" id="direction-4">
+        <div class="mockup-header">
+          <div class="mockup-info">
+            <h2>Direction 4: Floating Panels</h2>
+            <p>Creative, distinctive design with floating glass panels. Stands out from competitors.</p>
+          </div>
+          <div class="mockup-tags">
+            <span class="tag">Creative</span>
+            <span class="tag">Distinctive</span>
+            <span class="tag">Modern</span>
+          </div>
+        </div>
+        
+        <div class="mockup-frame">
+          <div class="canvas">
+            <div class="floating-header">
+              <div class="logo">TransKeep</div>
+              <div style="display: flex; gap: 8px;">
+                <button style="padding: 6px 12px; border-radius: 6px; border: none; background: #F3F4F6; font-size: 13px; cursor: pointer;">🔗 Sync</button>
+                <button style="padding: 6px 12px; border-radius: 6px; border: none; background: #F3F4F6; font-size: 13px; cursor: pointer;">⚙️</button>
+              </div>
+            </div>
+            
+            <div class="doc-panels">
+              <div class="doc-panel">
+                <div class="panel-header">Original</div>
+                <div class="panel-body">
+                  <div class="text-block">The quick brown fox jumps over the lazy dog.</div>
+                  <div class="text-block">In the heart of the ancient forest, where sunlight barely penetrates.</div>
+                  <div class="text-block">Technology has transformed communication.</div>
+                </div>
+              </div>
+              
+              <div class="doc-panel">
+                <div class="panel-header">Translated (Japanese)</div>
+                <div class="panel-body">
+                  <div class="text-block">素早い茶色の狐が怠惰な犬を飛び越える。</div>
+                  <div class="text-block">太陽の光がほとんど届かない古代の森の奥深くに。</div>
+                  <div class="text-block">テクノロジーはコミュニケーションを変革しました。</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="floating-controls">
+              <button class="tone-chip">Formal</button>
+              <button class="tone-chip">Casual</button>
+              <button class="tone-chip active">Creative</button>
+              <button class="tone-chip">Technical</button>
+              <button class="btn-download">Download PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <footer>
+      <p>TransKeep UX Design - Design Direction Mockups</p>
+      <p>Created December 1, 2025 • <a href="ux-design-specification.md">View Full Specification</a></p>
+    </footer>
+  </main>
+  
+  <script>
+    function showDirection(num) {
+      // Hide all directions
+      document.querySelectorAll('.direction').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.direction-thumb').forEach(t => t.classList.remove('active'));
+      
+      // Show selected direction
+      document.getElementById('direction-' + num).classList.add('active');
+      document.querySelectorAll('.direction-thumb')[num - 1].classList.add('active');
+    }
+    
+    function toggleCompare() {
+      alert('Compare mode coming soon! This would show multiple directions side-by-side.');
+    }
+  </script>
+</body>
+</html>
+

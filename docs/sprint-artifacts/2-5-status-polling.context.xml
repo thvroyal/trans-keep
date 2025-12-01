@@ -1,0 +1,240 @@
+<story-context id="2-5-status-polling" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.5</storyId>
+    <title>Status Polling Endpoint</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-5-status-polling.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>See real-time progress of my document translation</iWant>
+    <soThat>I know how long to wait and can be confident the process is working</soThat>
+    
+    <tasks>
+      <task id="1" title="Create Status Endpoint" estimate="1.5h">
+        <subtask>Define GET /api/v1/status/{job_id} route</subtask>
+        <subtask>Query translation status from DB</subtask>
+        <subtask>Calculate progress percentage</subtask>
+        <subtask>Estimate completion time</subtask>
+        <subtask>Return JSON response</subtask>
+      </task>
+      
+      <task id="2" title="Implement Progress Calculation" estimate="1h">
+        <subtask>Track blocks extracted</subtask>
+        <subtask>Track blocks translated</subtask>
+        <subtask>Calculate progress: (translated / total) * 100</subtask>
+        <subtask>Handle edge cases (0 blocks, etc.)</subtask>
+        <subtask>Test calculations</subtask>
+      </task>
+      
+      <task id="3" title="Build Frontend UI" estimate="1.5h">
+        <subtask>Create ProcessingPage component</subtask>
+        <subtask>Add progress bar (shadcn/ui Progress)</subtask>
+        <subtask>Show percentage and ETA</subtask>
+        <subtask>Add cancel button option</subtask>
+        <subtask>Handle completion state</subtask>
+      </task>
+      
+      <task id="4" title="Implement Frontend Polling" estimate="1.5h">
+        <subtask>Use TanStack Query useQuery</subtask>
+        <subtask>Set refetchInterval: 2000 (2 seconds)</subtask>
+        <subtask>Stop polling when status === 'completed'</subtask>
+        <subtask>Handle errors in polling</subtask>
+        <subtask>Show loading state</subtask>
+      </task>
+      
+      <task id="5" title="Error Handling" estimate="1h">
+        <subtask>Handle job not found (404)</subtask>
+        <subtask>Handle permission denied (403)</subtask>
+        <subtask>Handle server errors (500)</subtask>
+        <subtask>Retry logic for transient errors</subtask>
+        <subtask>User-friendly error messages</subtask>
+      </task>
+      
+      <task id="6" title="Integration & Testing" estimate="1.5h">
+        <subtask>Test with real Celery tasks</subtask>
+        <subtask>Test polling with long-running job</subtask>
+        <subtask>Test completion detection</subtask>
+        <subtask>Test error scenarios</subtask>
+        <subtask>Performance test (many polls)</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-2.5.1" title="Status Endpoint">
+      <requirement>GET /api/v1/status/{job_id} returns status</requirement>
+      <requirement>Returns: status, progress %, page count, ETA</requirement>
+      <requirement>Handles invalid job IDs gracefully</requirement>
+      <requirement>Requires authentication</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.5.2" title="Progress Calculation">
+      <requirement>Tracks extracted blocks</requirement>
+      <requirement>Tracks translated blocks</requirement>
+      <requirement>Calculates completion percentage</requirement>
+      <requirement>Updates in real-time</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.5.3" title="Frontend Polling">
+      <requirement>TanStack Query with refetchInterval</requirement>
+      <requirement>Polls every 2 seconds</requirement>
+      <requirement>Shows progress bar</requirement>
+      <requirement>Shows estimated time remaining</requirement>
+      <requirement>Stops polling when complete</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.5.4" title="Error States">
+      <requirement>Shows error message if translation fails</requirement>
+      <requirement>Allows retry option</requirement>
+      <requirement>Logs errors for debugging</requirement>
+      <requirement>Graceful timeout handling</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.5.5" title="Integration">
+      <requirement>Works with Celery pipeline (Story 2.4)</requirement>
+      <requirement>Works with upload endpoint (Story 2.1)</requirement>
+      <requirement>Seamless user experience</requirement>
+      <requirement>No manual refresh needed</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 5.1 - API Endpoints</section>
+        <snippet>GET /api/v1/status/{job_id} - returns job status, progress, ETA.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 4.2 - Processing Screen</section>
+        <snippet>Progress bar, percentage display, ETA, cancel option, completion transition.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/models/translation.py</path>
+        <kind>model</kind>
+        <symbol>Translation</symbol>
+        <reason>Translation model - query status from this</reason>
+      </file>
+      <file>
+        <path>frontend/src/pages/ProcessingPage.tsx</path>
+        <kind>component</kind>
+        <symbol>ProcessingPage</symbol>
+        <reason>Processing page from Story 1.4 - enhance with polling</reason>
+      </file>
+      <file>
+        <path>frontend/src/store/appStore.ts</path>
+        <kind>store</kind>
+        <symbol>currentJob</symbol>
+        <reason>Zustand store - update currentJob state</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <npm>
+        <package name="@tanstack/react-query" version="^5.13.4">Data fetching with polling</package>
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="performance">Cache status in Redis for 10 seconds</constraint>
+    <constraint type="performance">Index job_id in database for fast queries</constraint>
+    <constraint type="ux">Poll every 2 seconds (not faster to avoid server load)</constraint>
+    <constraint type="ux">Stop polling immediately when status is 'completed' or 'failed'</constraint>
+    <constraint type="ux">ETA calculation: (time_elapsed / progress%) - time_elapsed</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Status Endpoint</name>
+      <kind>REST API</kind>
+      <signature>
+        GET /api/v1/status/{job_id}
+        Authorization: Bearer {jwt_token}
+        
+        Response 200:
+        {
+          "job_id": "uuid",
+          "status": "processing" | "completed" | "failed" | "pending",
+          "progress": 45,
+          "total_blocks": 100,
+          "translated_blocks": 45,
+          "eta_seconds": 120,
+          "page_count": 10,
+          "error_message": null
+        }
+        
+        Response 404: Job not found
+        Response 403: Not authorized to view this job
+      </signature>
+      <path>backend/app/routers/status.py</path>
+    </interface>
+    <interface>
+      <name>useJobStatus Hook</name>
+      <kind>React hook</kind>
+      <signature>
+        function useJobStatus(jobId: string) {
+          return useQuery({
+            queryKey: ['job-status', jobId],
+            queryFn: () => api.getJobStatus(jobId),
+            refetchInterval: (data) => 
+              data?.status === 'completed' || data?.status === 'failed' 
+                ? false 
+                : 2000,
+          })
+        }
+      </signature>
+      <path>frontend/src/hooks/useJobStatus.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest for backend endpoint tests. Use React Testing Library for frontend.
+      Test polling behavior with mock timers. Integration test with real Celery pipeline.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_status.py</location>
+      <location>frontend/src/hooks/__tests__/useJobStatus.test.ts</location>
+      <location>frontend/src/pages/__tests__/ProcessingPage.test.tsx</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-2.5.1">
+        <test>Test status endpoint returns correct fields</test>
+        <test>Test 404 for invalid job_id</test>
+        <test>Test 403 for unauthorized access</test>
+      </idea>
+      <idea acId="AC-2.5.2">
+        <test>Test progress calculation accuracy</test>
+        <test>Test ETA calculation</test>
+        <test>Test handles 0 blocks edge case</test>
+      </idea>
+      <idea acId="AC-2.5.3">
+        <test>Test polling starts on mount</test>
+        <test>Test polling stops on completion</test>
+        <test>Test progress bar updates</test>
+      </idea>
+      <idea acId="AC-2.5.4">
+        <test>Test error message display</test>
+        <test>Test retry button works</test>
+      </idea>
+      <idea acId="AC-2.5.5">
+        <test>Test full flow: upload → processing → complete</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

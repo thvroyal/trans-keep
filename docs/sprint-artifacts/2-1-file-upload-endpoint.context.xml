@@ -1,0 +1,269 @@
+<story-context id="2-1-file-upload-endpoint" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.1</storyId>
+    <title>File Upload Endpoint</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-1-file-upload-endpoint.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>Upload a PDF file through a drag-and-drop interface</iWant>
+    <soThat>I can start the translation process and track its progress</soThat>
+    
+    <tasks>
+      <task id="1" title="Create Upload Endpoint" estimate="2h">
+        <subtask>Define request schema (multipart/form-data)</subtask>
+        <subtask>Create POST /api/v1/upload route</subtask>
+        <subtask>Implement file stream handling</subtask>
+        <subtask>Implement response with job_id</subtask>
+        <subtask>Add request logging</subtask>
+      </task>
+      
+      <task id="2" title="Implement File Validation" estimate="1.5h">
+        <subtask>Check Content-Type header (application/pdf)</subtask>
+        <subtask>Validate file size before upload</subtask>
+        <subtask>Add custom error messages</subtask>
+        <subtask>Test with invalid files</subtask>
+        <subtask>Add rate limiting (10 files/user/day)</subtask>
+      </task>
+      
+      <task id="3" title="Implement S3 Upload" estimate="2h">
+        <subtask>Create S3 key naming convention</subtask>
+        <subtask>Upload file in chunks for large files</subtask>
+        <subtask>Generate pre-signed URL for download</subtask>
+        <subtask>Implement error retry logic</subtask>
+        <subtask>Test with 10MB, 100MB files</subtask>
+      </task>
+      
+      <task id="4" title="Create Database Record" estimate="1.5h">
+        <subtask>Create Translation model</subtask>
+        <subtask>Insert record on successful upload</subtask>
+        <subtask>Set status = "pending"</subtask>
+        <subtask>Handle database errors gracefully</subtask>
+        <subtask>Return job_id in response</subtask>
+      </task>
+      
+      <task id="5" title="Build Frontend UI" estimate="2.5h">
+        <subtask>Create file drop zone component</subtask>
+        <subtask>Add drag and drop support</subtask>
+        <subtask>Show upload progress</subtask>
+        <subtask>Handle errors and display them</subtask>
+        <subtask>Redirect to /processing/{job_id}</subtask>
+      </task>
+      
+      <task id="6" title="Integration Testing" estimate="1.5h">
+        <subtask>Test full upload flow with small PDF</subtask>
+        <subtask>Test with 100MB PDF</subtask>
+        <subtask>Test with invalid files</subtask>
+        <subtask>Test error handling</subtask>
+        <subtask>Test database record creation</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-2.1.1" title="Upload Endpoint Implemented">
+      <requirement>POST /api/v1/upload endpoint working</requirement>
+      <requirement>Accepts multipart/form-data with file</requirement>
+      <requirement>Returns job_id and upload_token</requirement>
+      <requirement>Requires authentication (JWT)</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.1.2" title="File Validation">
+      <requirement>Validates file type (PDF only)</requirement>
+      <requirement>Validates file size (≤100MB)</requirement>
+      <requirement>Rejects invalid files with clear error</requirement>
+      <requirement>Prevents file upload attacks</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.1.3" title="S3 Storage">
+      <requirement>Files uploaded to S3 (or MinIO locally)</requirement>
+      <requirement>Temporary upload location used</requirement>
+      <requirement>File deleted after 24 hours (cleanup job)</requirement>
+      <requirement>boto3 properly configured</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.1.4" title="Database Record Created">
+      <requirement>Translation record created in DB</requirement>
+      <requirement>Status set to "pending"</requirement>
+      <requirement>User ID associated</requirement>
+      <requirement>Timestamps recorded</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.1.5" title="Frontend Integration">
+      <requirement>File drop zone on UploadPage</requirement>
+      <requirement>Progress indicator during upload</requirement>
+      <requirement>Error handling and display</requirement>
+      <requirement>Redirect to ProcessingPage after upload</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 4.1 - File Upload Flow</section>
+        <snippet>Upload flow: validate → S3 upload → DB record → Celery task trigger. Uses chunked upload for large files.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 5.1 - API Endpoints</section>
+        <snippet>POST /api/v1/upload - multipart/form-data, returns job_id, requires auth.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR11-20: File Upload & Processing</section>
+        <snippet>Upload PDF up to 100MB, validate file type, show progress, store in S3.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 4.1 - Upload Screen</section>
+        <snippet>Drag-and-drop zone, file validation feedback, upload progress, language selection.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/models/translation.py</path>
+        <kind>model</kind>
+        <symbol>Translation</symbol>
+        <reason>Translation model from Story 1.2 - will be used to create records</reason>
+      </file>
+      <file>
+        <path>backend/app/routers/auth.py</path>
+        <kind>router</kind>
+        <symbol>get_current_user</symbol>
+        <reason>Auth dependency from Story 1.3 - required for protected endpoint</reason>
+      </file>
+      <file>
+        <path>frontend/src/pages/UploadPage.tsx</path>
+        <kind>component</kind>
+        <symbol>UploadPage</symbol>
+        <reason>Page component from Story 1.4 - will add file drop zone</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="boto3" version="1.33.0">AWS S3 SDK</package>
+        <package name="python-multipart" version="0.0.6">Multipart form data parsing</package>
+      </python>
+      <npm>
+        <package name="react-dropzone" version="^14.2.3">File drag-and-drop component</package>
+        <package name="@tanstack/react-query" version="^5.13.4">API state management</package>
+      </npm>
+      <infrastructure>
+        <service name="MinIO" version="latest">S3-compatible storage for local dev</service>
+      </infrastructure>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="security">Validate file type on server side (not just Content-Type header)</constraint>
+    <constraint type="security">Sanitize filenames to prevent path traversal attacks</constraint>
+    <constraint type="security">Rate limit uploads (10 files/user/day for free tier)</constraint>
+    <constraint type="performance">Use chunked upload for files &gt;10MB</constraint>
+    <constraint type="performance">Stream files directly to S3 (don't buffer in memory)</constraint>
+    <constraint type="storage">S3 key format: uploads/{user_id}/{job_id}/{filename}.pdf</constraint>
+    <constraint type="storage">Set 24-hour lifecycle policy for cleanup</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Upload Endpoint</name>
+      <kind>REST API</kind>
+      <signature>
+        POST /api/v1/upload
+        Content-Type: multipart/form-data
+        Authorization: Bearer {jwt_token}
+        
+        Body: file (PDF, max 100MB), source_lang (optional), target_lang (required)
+        
+        Response 200:
+        {
+          "job_id": "uuid",
+          "status": "pending",
+          "message": "File uploaded successfully"
+        }
+        
+        Response 400: Invalid file type/size
+        Response 401: Unauthorized
+        Response 429: Rate limit exceeded
+      </signature>
+      <path>backend/app/routers/upload.py</path>
+    </interface>
+    <interface>
+      <name>S3 Service</name>
+      <kind>service</kind>
+      <signature>
+        class S3Service:
+            async def upload_file(file: UploadFile, key: str) -> str
+            async def get_presigned_url(key: str, expires: int = 3600) -> str
+            async def delete_file(key: str) -> bool
+      </signature>
+      <path>backend/app/services/s3_service.py</path>
+    </interface>
+    <interface>
+      <name>FileDropZone Component</name>
+      <kind>React component</kind>
+      <signature>
+        interface FileDropZoneProps {
+          onFileSelect: (file: File) => void
+          onUploadProgress: (progress: number) => void
+          onError: (error: string) => void
+          maxSize?: number // default 100MB
+          acceptedTypes?: string[] // default ['application/pdf']
+        }
+      </signature>
+      <path>frontend/src/components/FileDropZone.tsx</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest for backend tests with pytest-asyncio for async endpoints.
+      Mock S3 with moto library. Use httpx for API integration tests.
+      Use React Testing Library for frontend component tests.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_upload.py</location>
+      <location>frontend/src/components/__tests__/FileDropZone.test.tsx</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-2.1.1">
+        <test>Test upload endpoint returns job_id</test>
+        <test>Test upload requires authentication</test>
+        <test>Test upload creates database record</test>
+      </idea>
+      <idea acId="AC-2.1.2">
+        <test>Test rejects non-PDF files</test>
+        <test>Test rejects files over 100MB</test>
+        <test>Test rate limiting works</test>
+      </idea>
+      <idea acId="AC-2.1.3">
+        <test>Test file uploaded to S3 with correct key</test>
+        <test>Test chunked upload for large files</test>
+      </idea>
+      <idea acId="AC-2.1.4">
+        <test>Test translation record created with pending status</test>
+        <test>Test user_id associated with record</test>
+      </idea>
+      <idea acId="AC-2.1.5">
+        <test>Test drag-and-drop triggers onFileSelect</test>
+        <test>Test progress indicator updates</test>
+        <test>Test error messages display</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

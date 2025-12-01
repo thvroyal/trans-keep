@@ -1,0 +1,256 @@
+<story-context id="1-3-google-oauth-integration" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.3</storyId>
+    <title>Google OAuth Integration</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-3-google-oauth-integration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>Sign in with my Google account to access TransKeep</iWant>
+    <soThat>I can securely authenticate without creating another password and access my translations across sessions</soThat>
+    
+    <tasks>
+      <task id="1" title="Register Google OAuth App" estimate="30m">
+        <subtask>Go to Google Cloud Console</subtask>
+        <subtask>Create new OAuth 2.0 Consent Screen</subtask>
+        <subtask>Configure OAuth 2.0 Client ID (Web Application)</subtask>
+        <subtask>Set Authorized redirect URIs</subtask>
+        <subtask>Copy Client ID and Client Secret</subtask>
+        <subtask>Store in backend/.env</subtask>
+      </task>
+      
+      <task id="2" title="Configure better-auth Backend" estimate="2h">
+        <subtask>Install better-auth and google provider</subtask>
+        <subtask>Create auth configuration</subtask>
+        <subtask>Set up JWT secret and expiration</subtask>
+        <subtask>Implement /auth/google/callback endpoint</subtask>
+        <subtask>Implement /auth/logout endpoint</subtask>
+        <subtask>Test OAuth flow locally</subtask>
+      </task>
+      
+      <task id="3" title="Implement Frontend OAuth" estimate="2h">
+        <subtask>Install @better-auth/react</subtask>
+        <subtask>Create useAuth hook</subtask>
+        <subtask>Create SignIn button component</subtask>
+        <subtask>Create callback page (/auth/callback)</subtask>
+        <subtask>Store token in httpOnly cookie</subtask>
+        <subtask>Test sign-in flow</subtask>
+      </task>
+      
+      <task id="4" title="Add Authentication Middleware" estimate="1.5h">
+        <subtask>Create JWT verification middleware</subtask>
+        <subtask>Protect /api/v1/* endpoints</subtask>
+        <subtask>Implement GET /api/v1/me endpoint</subtask>
+        <subtask>Add user info to request context</subtask>
+        <subtask>Test with curl requests</subtask>
+      </task>
+      
+      <task id="5" title="Implement Session Persistence" estimate="1h">
+        <subtask>Check for existing token on app load</subtask>
+        <subtask>Refresh token if expired</subtask>
+        <subtask>Handle token expiration gracefully</subtask>
+        <subtask>Redirect to sign-in if needed</subtask>
+        <subtask>Test persistence across sessions</subtask>
+      </task>
+      
+      <task id="6" title="Write Tests" estimate="1.5h">
+        <subtask>Test Google OAuth flow</subtask>
+        <subtask>Test token generation and validation</subtask>
+        <subtask>Test protected endpoints</subtask>
+        <subtask>Test sign-out flow</subtask>
+        <subtask>Test session persistence</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-1.3.1" title="Google OAuth Credentials">
+      <requirement>Google OAuth app registered in Google Cloud Console</requirement>
+      <requirement>Client ID and Client Secret obtained</requirement>
+      <requirement>Redirect URI configured: http://localhost:3000/callback</requirement>
+      <requirement>Credentials stored in .env files</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.3.2" title="Backend better-auth Setup">
+      <requirement>better-auth installed and configured</requirement>
+      <requirement>Google provider configured</requirement>
+      <requirement>JWT token generation working</requirement>
+      <requirement>Token refresh logic implemented</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.3.3" title="Frontend OAuth Flow">
+      <requirement>better-auth React hook installed</requirement>
+      <requirement>Sign-in button implemented</requirement>
+      <requirement>Callback page handles OAuth redirect</requirement>
+      <requirement>Token stored securely (httpOnly cookie)</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.3.4" title="Protected Endpoints">
+      <requirement>Middleware verifies JWT tokens</requirement>
+      <requirement>GET /api/v1/me returns user info</requirement>
+      <requirement>Unauthorized endpoints return 401</requirement>
+      <requirement>Token expiration handled</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.3.5" title="Sign Out & Session Management">
+      <requirement>Sign out clears token</requirement>
+      <requirement>Session persists on page reload</requirement>
+      <requirement>Token refresh works automatically</requirement>
+      <requirement>No token exposed in localStorage</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 2.3 - Authentication Flow (using better-auth)</section>
+        <snippet>Backend setup with BetterAuth, Google provider, JWT signing. Frontend flow with httpOnly cookies and automatic token refresh.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 7.1 - Authentication & Authorization</section>
+        <snippet>Google OAuth flow: consent screen → code exchange → ID token verification → JWT generation → httpOnly cookie storage.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR1-10: User Account & Authentication</section>
+        <snippet>Users can create account via Google OAuth sign-in (no email/password). Users remain logged in across sessions. Free tier tracking.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-1-tech-stack.md</path>
+        <title>Epic 1 Tech Stack</title>
+        <section>Authentication Technologies</section>
+        <snippet>better-auth for OAuth, python-jose for JWT, google-auth for token verification.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/main.py</path>
+        <kind>application</kind>
+        <symbol>FastAPI app</symbol>
+        <reason>Main app where auth router and middleware will be registered</reason>
+      </file>
+      <file>
+        <path>backend/app/models/user.py</path>
+        <kind>model</kind>
+        <symbol>User</symbol>
+        <reason>User model created in Story 1.2 - OAuth will create/lookup users</reason>
+      </file>
+      <file>
+        <path>backend/app/database.py</path>
+        <kind>service</kind>
+        <symbol>get_db</symbol>
+        <reason>Database session dependency for user operations</reason>
+      </file>
+      <file>
+        <path>frontend/src/App.tsx</path>
+        <kind>component</kind>
+        <symbol>App</symbol>
+        <reason>Main app component where auth provider will be wrapped</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="python-jose" version="3.3.0">JWT token creation and validation</package>
+        <package name="google-auth" version="2.25.2">Google OAuth token verification</package>
+        <package name="httpx" version="0.25.2">Async HTTP client for OAuth callbacks</package>
+      </python>
+      <npm>
+        <package name="@better-auth/react" version="latest">React hooks for better-auth</package>
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="security">Use httpOnly cookies for token storage (no localStorage)</constraint>
+    <constraint type="security">JWT tokens must be signed with secure secret (256+ bits)</constraint>
+    <constraint type="security">All OAuth operations must use HTTPS in production</constraint>
+    <constraint type="security">Never log tokens or sensitive user data</constraint>
+    <constraint type="pattern">Use dependency injection for auth middleware</constraint>
+    <constraint type="pattern">Extract user_id and tenant_id from JWT claims</constraint>
+    <constraint type="ux">Token refresh should be transparent to user</constraint>
+    <constraint type="ux">Sign-out should clear all session data</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Auth Router</name>
+      <kind>REST endpoints</kind>
+      <signature>
+        POST /api/v1/auth/google - Initiate Google OAuth
+        GET /api/v1/auth/google/callback - Handle OAuth callback
+        POST /api/v1/auth/logout - Clear session
+        GET /api/v1/me - Get current user info
+      </signature>
+      <path>backend/app/routers/auth.py</path>
+    </interface>
+    <interface>
+      <name>Auth Middleware</name>
+      <kind>FastAPI dependency</kind>
+      <signature>
+        async def get_current_user(token: str = Depends(oauth2_scheme)) -> User
+        async def require_auth(user: User = Depends(get_current_user)) -> User
+      </signature>
+      <path>backend/app/middleware/auth_middleware.py</path>
+    </interface>
+    <interface>
+      <name>useAuth Hook</name>
+      <kind>React hook</kind>
+      <signature>
+        const { user, isAuthenticated, signIn, signOut, isLoading } = useAuth()
+      </signature>
+      <path>frontend/src/hooks/useAuth.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest for backend auth tests. Mock Google OAuth responses for unit tests.
+      Use React Testing Library for frontend auth component tests.
+      Integration tests should use actual OAuth flow with test credentials.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_auth.py</location>
+      <location>frontend/src/__tests__/useAuth.test.ts</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-1.3.1">
+        <test>Test OAuth credentials are loaded from environment</test>
+        <test>Test redirect URI matches configured value</test>
+      </idea>
+      <idea acId="AC-1.3.2">
+        <test>Test JWT token generation with valid user</test>
+        <test>Test JWT token contains required claims (sub, tenant_id, exp)</test>
+        <test>Test token refresh generates new valid token</test>
+      </idea>
+      <idea acId="AC-1.3.3">
+        <test>Test sign-in button triggers OAuth flow</test>
+        <test>Test callback page handles successful auth</test>
+        <test>Test callback page handles auth errors</test>
+      </idea>
+      <idea acId="AC-1.3.4">
+        <test>Test /api/v1/me returns 401 without token</test>
+        <test>Test /api/v1/me returns user info with valid token</test>
+        <test>Test expired token returns 401</test>
+      </idea>
+      <idea acId="AC-1.3.5">
+        <test>Test sign-out clears session cookie</test>
+        <test>Test session persists after page reload</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

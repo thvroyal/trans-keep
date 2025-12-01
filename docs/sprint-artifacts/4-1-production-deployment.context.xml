@@ -1,0 +1,247 @@
+<story-context id="4-1-production-deployment" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.1</storyId>
+    <title>Production Deployment</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-1-production-deployment.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>DevOps Engineer</asA>
+    <iWant>Deploy TransKeep to AWS production infrastructure</iWant>
+    <soThat>The application is available to beta users with high availability, security, and observability</soThat>
+    
+    <tasks>
+      <task id="1" title="Prepare AWS Infrastructure" estimate="2h">
+        <subtask>Set up VPC and subnets</subtask>
+        <subtask>Configure security groups</subtask>
+        <subtask>Create RDS instance</subtask>
+        <subtask>Create ElastiCache cluster</subtask>
+        <subtask>Test connectivity</subtask>
+      </task>
+      
+      <task id="2" title="Deploy Backend to ECS" estimate="2h">
+        <subtask>Create ECR repository</subtask>
+        <subtask>Build and push Docker image</subtask>
+        <subtask>Create ECS task definition</subtask>
+        <subtask>Create ECS service</subtask>
+        <subtask>Configure load balancer</subtask>
+        <subtask>Test health checks</subtask>
+      </task>
+      
+      <task id="3" title="Deploy Frontend to CloudFront" estimate="1.5h">
+        <subtask>Build React app for production</subtask>
+        <subtask>Create S3 bucket</subtask>
+        <subtask>Upload build artifacts</subtask>
+        <subtask>Create CloudFront distribution</subtask>
+        <subtask>Configure cache behaviors</subtask>
+        <subtask>Test CDN</subtask>
+      </task>
+      
+      <task id="4" title="Set Up OpenTelemetry Exporter" estimate="1.5h">
+        <subtask>Configure Otel to send to CloudWatch</subtask>
+        <subtask>Create CloudWatch log groups</subtask>
+        <subtask>Create dashboards for key metrics</subtask>
+        <subtask>Set up alarms</subtask>
+        <subtask>Test logging</subtask>
+      </task>
+      
+      <task id="5" title="Configure Domain & SSL" estimate="1h">
+        <subtask>Purchase domain</subtask>
+        <subtask>Create Route 53 hosted zone</subtask>
+        <subtask>Request ACM certificate</subtask>
+        <subtask>Configure DNS records</subtask>
+        <subtask>Enable HTTPS enforcement</subtask>
+        <subtask>Test SSL</subtask>
+      </task>
+      
+      <task id="6" title="Final Integration Testing" estimate="1.5h">
+        <subtask>Test complete flow: upload → translate → download</subtask>
+        <subtask>Test on production URLs</subtask>
+        <subtask>Load testing (100+ concurrent users)</subtask>
+        <subtask>Failover testing</subtask>
+        <subtask>Backup verification</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-4.1.1" title="Backend on AWS ECS">
+      <requirement>Docker image pushed to ECR</requirement>
+      <requirement>ECS service running</requirement>
+      <requirement>Load balancer configured</requirement>
+      <requirement>Auto-scaling rules set</requirement>
+      <requirement>Health checks working</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.1.2" title="Frontend on CloudFront + S3">
+      <requirement>Frontend build deployed to S3</requirement>
+      <requirement>CloudFront distribution created</requirement>
+      <requirement>Cache invalidation working</requirement>
+      <requirement>SSL/TLS configured</requirement>
+      <requirement>Edge locations optimized</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.1.3" title="Database & Cache">
+      <requirement>RDS PostgreSQL instance created</requirement>
+      <requirement>ElastiCache Redis cluster created</requirement>
+      <requirement>Security groups configured</requirement>
+      <requirement>Backups automated</requirement>
+      <requirement>Monitoring enabled</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.1.4" title="Observability">
+      <requirement>OpenTelemetry sends to CloudWatch</requirement>
+      <requirement>Logs aggregated</requirement>
+      <requirement>Metrics visible in dashboards</requirement>
+      <requirement>Alarms set for errors</requirement>
+      <requirement>Log retention configured</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.1.5" title="Domain & SSL">
+      <requirement>Domain name purchased</requirement>
+      <requirement>DNS records configured</requirement>
+      <requirement>SSL certificate from AWS ACM</requirement>
+      <requirement>HTTPS enforced</requirement>
+      <requirement>Redirect HTTP → HTTPS</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 8 - Deployment Architecture</section>
+        <snippet>AWS ECS for backend, CloudFront+S3 for frontend, RDS PostgreSQL, ElastiCache Redis.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 9 - Monitoring & Observability</section>
+        <snippet>OpenTelemetry to CloudWatch, dashboards, alarms, log aggregation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-4-tech-stack.md</path>
+        <title>Epic 4 Tech Stack</title>
+        <section>Production Deployment Technologies</section>
+        <snippet>AWS ECS, ECR, CloudFront, S3, RDS, ElastiCache, Route 53, ACM, CloudWatch.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>docker-compose.yml</path>
+        <kind>infrastructure</kind>
+        <symbol>services</symbol>
+        <reason>Local Docker setup - base for ECS task definition</reason>
+      </file>
+      <file>
+        <path>backend/Dockerfile</path>
+        <kind>infrastructure</kind>
+        <symbol>Dockerfile</symbol>
+        <reason>Backend Docker image for ECR</reason>
+      </file>
+      <file>
+        <path>frontend/Dockerfile</path>
+        <kind>infrastructure</kind>
+        <symbol>Dockerfile</symbol>
+        <reason>Frontend build for S3 deployment</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <infrastructure>
+        <service name="AWS ECS" version="latest">Container orchestration</service>
+        <service name="AWS ECR" version="latest">Container registry</service>
+        <service name="AWS CloudFront" version="latest">CDN</service>
+        <service name="AWS S3" version="latest">Static hosting</service>
+        <service name="AWS RDS" version="PostgreSQL 15">Managed database</service>
+        <service name="AWS ElastiCache" version="Redis 7">Managed cache</service>
+        <service name="AWS Route 53" version="latest">DNS</service>
+        <service name="AWS ACM" version="latest">SSL certificates</service>
+        <service name="AWS CloudWatch" version="latest">Monitoring</service>
+      </infrastructure>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="infrastructure">Use Infrastructure as Code (CloudFormation or Terraform)</constraint>
+    <constraint type="infrastructure">Multi-AZ deployment for high availability</constraint>
+    <constraint type="security">Use AWS Secrets Manager for sensitive config</constraint>
+    <constraint type="security">Configure WAF for DDoS protection</constraint>
+    <constraint type="security">Enable CloudTrail for audit logging</constraint>
+    <constraint type="cost">Target &lt;$100/month baseline infrastructure cost</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>ECS Task Definition</name>
+      <kind>infrastructure</kind>
+      <signature>
+        Task: transkeep-backend
+        - Container: backend (ECR image)
+        - CPU: 512, Memory: 1024
+        - Port: 8000
+        - Environment: from Secrets Manager
+        - Health check: /health
+      </signature>
+      <path>infrastructure/ecs-task-definition.json</path>
+    </interface>
+    <interface>
+      <name>CloudFront Distribution</name>
+      <kind>infrastructure</kind>
+      <signature>
+        Origin: S3 bucket (transkeep-frontend)
+        Behaviors:
+        - /api/* → ALB origin
+        - /* → S3 origin
+        SSL: ACM certificate
+        Cache: Standard caching
+      </signature>
+      <path>infrastructure/cloudfront.tf</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Integration tests on production URLs. Load testing with k6.
+      Failover testing by terminating instances. Backup restoration test.
+    </standards>
+    
+    <locations>
+      <location>infrastructure/tests/</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-4.1.1">
+        <test>Test ECS service is running</test>
+        <test>Test health check endpoint responds</test>
+        <test>Test auto-scaling triggers</test>
+      </idea>
+      <idea acId="AC-4.1.2">
+        <test>Test CloudFront serves frontend</test>
+        <test>Test cache invalidation works</test>
+        <test>Test SSL certificate valid</test>
+      </idea>
+      <idea acId="AC-4.1.3">
+        <test>Test database connectivity</test>
+        <test>Test Redis connectivity</test>
+        <test>Test backup restoration</test>
+      </idea>
+      <idea acId="AC-4.1.4">
+        <test>Test logs appear in CloudWatch</test>
+        <test>Test alarms trigger on errors</test>
+      </idea>
+      <idea acId="AC-4.1.5">
+        <test>Test domain resolves correctly</test>
+        <test>Test HTTPS enforced</test>
+        <test>Test HTTP redirects to HTTPS</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

@@ -1,0 +1,242 @@
+<story-context id="3-2-tone-customization" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.2</storyId>
+    <title>Tone Customization UI & Logic</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-2-tone-customization.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>Customize the tone of my translation (professional, casual, technical, etc.)</iWant>
+    <soThat>The translated document matches my intended audience and communication style</soThat>
+    
+    <tasks>
+      <task id="1" title="Create ToneSelector Component" estimate="1h">
+        <subtask>Design tone preset buttons</subtask>
+        <subtask>Create custom input field</subtask>
+        <subtask>Show selected tone</subtask>
+        <subtask>Add descriptions for each tone</subtask>
+        <subtask>Make responsive</subtask>
+      </task>
+      
+      <task id="2" title="Implement Backend Tone Service" estimate="1.5h">
+        <subtask>Create tone_service.py</subtask>
+        <subtask>Configure Claude API client</subtask>
+        <subtask>Implement re-translation logic</subtask>
+        <subtask>Handle streaming responses</subtask>
+        <subtask>Track API costs</subtask>
+      </task>
+      
+      <task id="3" title="Build Before/After UI" estimate="1.5h">
+        <subtask>Create comparison view component</subtask>
+        <subtask>Show original translation</subtask>
+        <subtask>Show tone-customized version</subtask>
+        <subtask>Highlight differences</subtask>
+        <subtask>Add accept/reject buttons</subtask>
+      </task>
+      
+      <task id="4" title="Integrate with Pipeline" estimate="1.5h">
+        <subtask>Add tone_customization task to Celery</subtask>
+        <subtask>Support pre-upload tone selection</subtask>
+        <subtask>Support post-translation tone application</subtask>
+        <subtask>Update status tracking</subtask>
+        <subtask>Handle tone API failures</subtask>
+      </task>
+      
+      <task id="5" title="Implement Cost Tracking" estimate="1h">
+        <subtask>Track Claude API usage</subtask>
+        <subtask>Display cost to user</subtask>
+        <subtask>Add cost warning if exceeds budget</subtask>
+        <subtask>Store cost in translation record</subtask>
+        <subtask>Show cumulative cost</subtask>
+      </task>
+      
+      <task id="6" title="Testing & Polish" estimate="1.5h">
+        <subtask>Test tone application</subtask>
+        <subtask>Test before/after comparison</subtask>
+        <subtask>Test cost tracking</subtask>
+        <subtask>Performance test with large documents</subtask>
+        <subtask>Cross-browser testing</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-3.2.1" title="Tone UI">
+      <requirement>ToneSelector component with 5 presets</requirement>
+      <requirement>Custom tone input field</requirement>
+      <requirement>Visual preview of tone</requirement>
+      <requirement>Apply tone button</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.2.2" title="Tone Options">
+      <requirement>Professional (formal business)</requirement>
+      <requirement>Casual (friendly, conversational)</requirement>
+      <requirement>Technical (for documentation)</requirement>
+      <requirement>Creative (for marketing)</requirement>
+      <requirement>Custom (user-defined)</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.2.3" title="Claude Integration">
+      <requirement>Claude API re-translates with tone</requirement>
+      <requirement>Shows before/after comparison</requirement>
+      <requirement>Visual diff highlighting</requirement>
+      <requirement>Cost tracking (~$0.048/doc)</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.2.4" title="User Experience">
+      <requirement>Apply tone instantly</requirement>
+      <requirement>Visual feedback during processing</requirement>
+      <requirement>Can select tone before upload (recommended)</requirement>
+      <requirement>Can apply after translation</requirement>
+      <requirement>Can preview without applying</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.2.5" title="Integration">
+      <requirement>Integrated with Celery pipeline</requirement>
+      <requirement>Works with review panel</requirement>
+      <requirement>Editable after tone applied</requirement>
+      <requirement>Cost visible to user</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 4.3 - Translation Pipeline</section>
+        <snippet>Claude 3.5 Haiku for tone customization layer after DeepL base translation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/technical-refinements.md</path>
+        <title>Technical Refinements</title>
+        <section>LLM Selection for Tone Customization</section>
+        <snippet>Claude 3.5 Haiku: fastest, cheapest ($0.80/M input, $4/M output), ideal for tone adjustment.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR41-50: Tone Customization</section>
+        <snippet>5 preset tones + custom, apply before or after translation, cost transparency.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 6.5 - AI Customization Components</section>
+        <snippet>ToneSelector chip design, custom tone input, before/after comparison panel.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/services/translation_service.py</path>
+        <kind>service</kind>
+        <symbol>TranslationService</symbol>
+        <reason>Translation service from Story 2.3 - extend with tone customization</reason>
+      </file>
+      <file>
+        <path>backend/app/tasks/pipeline.py</path>
+        <kind>task</kind>
+        <symbol>process_translation_job</symbol>
+        <reason>Pipeline task - add tone customization step</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="anthropic" version="0.18.1">Claude API client</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="cost">Target ~$0.048 per document for tone customization</constraint>
+    <constraint type="cost">Show cost estimate before applying tone</constraint>
+    <constraint type="api">Use Claude 3.5 Haiku for speed and cost efficiency</constraint>
+    <constraint type="api">Cache tone results to avoid duplicate API calls</constraint>
+    <constraint type="ux">Tone is optional - translation works without it</constraint>
+    <constraint type="ux">Allow tone selection before or after translation</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>ToneSelector Component</name>
+      <kind>React component</kind>
+      <signature>
+        interface ToneSelectorProps {
+          selectedTone: TonePreset | string
+          onToneSelect: (tone: TonePreset | string) => void
+          disabled?: boolean
+        }
+        
+        type TonePreset = 'professional' | 'casual' | 'technical' | 'creative' | 'custom'
+      </signature>
+      <path>frontend/src/components/ToneSelector.tsx</path>
+    </interface>
+    <interface>
+      <name>Tone Service</name>
+      <kind>service</kind>
+      <signature>
+        class ToneService:
+            def __init__(self, api_key: str)
+            async def apply_tone(text: str, tone: str, target_lang: str) -> str
+            async def batch_apply_tone(blocks: List[TranslatedBlock], tone: str) -> List[TranslatedBlock]
+            def get_cost_estimate(char_count: int) -> float
+      </signature>
+      <path>backend/app/services/tone_service.py</path>
+    </interface>
+    <interface>
+      <name>Tone Customization Task</name>
+      <kind>Celery task</kind>
+      <signature>
+        @celery_app.task(bind=True)
+        def customize_tone_task(self, job_id: str, blocks: List[TranslatedBlock], tone: str) -> List[TranslatedBlock]
+      </signature>
+      <path>backend/app/tasks/customize_tone.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest with mocked Claude responses. Test tone prompts generate expected output.
+      Test cost tracking accuracy. Test UI with React Testing Library.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_tone_service.py</location>
+      <location>frontend/src/components/__tests__/ToneSelector.test.tsx</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-3.2.1">
+        <test>Test all 5 preset buttons render</test>
+        <test>Test custom input field works</test>
+        <test>Test tone selection updates state</test>
+      </idea>
+      <idea acId="AC-3.2.2">
+        <test>Test each preset generates correct prompt</test>
+        <test>Test custom tone uses user input</test>
+      </idea>
+      <idea acId="AC-3.2.3">
+        <test>Test Claude API called with correct prompt</test>
+        <test>Test before/after comparison shows diff</test>
+        <test>Test cost tracking accuracy</test>
+      </idea>
+      <idea acId="AC-3.2.4">
+        <test>Test tone can be selected before upload</test>
+        <test>Test tone can be applied after translation</test>
+        <test>Test preview without applying</test>
+      </idea>
+      <idea acId="AC-3.2.5">
+        <test>Test Celery task integration</test>
+        <test>Test works with review panel</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

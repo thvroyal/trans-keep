@@ -1,0 +1,219 @@
+<story-context id="4-3-security-audit" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.3</storyId>
+    <title>Security Audit</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-3-security-audit.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Security Engineer</asA>
+    <iWant>Conduct a comprehensive security audit before beta launch</iWant>
+    <soThat>User data is protected and the application is secure against common attacks</soThat>
+    
+    <tasks>
+      <task id="1" title="HTTPS & Headers" estimate="1h">
+        <subtask>Verify SSL certificate</subtask>
+        <subtask>Configure HSTS headers</subtask>
+        <subtask>Set Content-Security-Policy</subtask>
+        <subtask>Set X-Frame-Options</subtask>
+        <subtask>Test with SSL Labs</subtask>
+      </task>
+      
+      <task id="2" title="CORS & API Security" estimate="1h">
+        <subtask>Review CORS configuration</subtask>
+        <subtask>Test with curl from different origins</subtask>
+        <subtask>Verify allowed methods</subtask>
+        <subtask>Check credentials handling</subtask>
+        <subtask>Test preflight requests</subtask>
+      </task>
+      
+      <task id="3" title="Multi-Tenant Verification" estimate="1.5h">
+        <subtask>Code review for user_id filtering</subtask>
+        <subtask>Database query audit</subtask>
+        <subtask>S3 policy review</subtask>
+        <subtask>Redis session verification</subtask>
+        <subtask>Penetration testing</subtask>
+      </task>
+      
+      <task id="4" title="Authentication Audit" estimate="1h">
+        <subtask>Review OAuth implementation</subtask>
+        <subtask>Check JWT validation</subtask>
+        <subtask>Verify token expiration</subtask>
+        <subtask>Audit logs for token exposure</subtask>
+        <subtask>Test token refresh flow</subtask>
+      </task>
+      
+      <task id="5" title="Data Cleanup Verification" estimate="1h">
+        <subtask>Verify cleanup jobs running</subtask>
+        <subtask>Check file deletion logs</subtask>
+        <subtask>Verify no sensitive data in logs</subtask>
+        <subtask>Set up data deletion request flow</subtask>
+        <subtask>Document data retention policy</subtask>
+      </task>
+      
+      <task id="6" title="Final Security Review" estimate="1h">
+        <subtask>Dependency vulnerability scan</subtask>
+        <subtask>Code security review</subtask>
+        <subtask>Documentation of security model</subtask>
+        <subtask>Create security policy document</subtask>
+        <subtask>Plan for future audits</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-4.3.1" title="HTTPS Enforcement">
+      <requirement>All traffic redirected to HTTPS</requirement>
+      <requirement>HSTS headers set</requirement>
+      <requirement>SSL/TLS certificate valid</requirement>
+      <requirement>No mixed content</requirement>
+      <requirement>HTTP public key pinning (optional)</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.3.2" title="CORS Configuration">
+      <requirement>CORS headers correct</requirement>
+      <requirement>Only allowed origins</requirement>
+      <requirement>Credentials handled safely</requirement>
+      <requirement>Preflight requests working</requirement>
+      <requirement>No over-permissive settings</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.3.3" title="Multi-Tenant Isolation">
+      <requirement>Users can't access other users' files</requirement>
+      <requirement>Database queries filtered by user_id</requirement>
+      <requirement>S3 bucket policies prevent cross-access</requirement>
+      <requirement>Redis sessions isolated</requirement>
+      <requirement>No data leakage</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.3.4" title="Authentication & Tokens">
+      <requirement>OAuth tokens properly validated</requirement>
+      <requirement>JWT expiration enforced</requirement>
+      <requirement>Token refresh working</requirement>
+      <requirement>No tokens in logs</requirement>
+      <requirement>Session hijacking prevention</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.3.5" title="Data Cleanup">
+      <requirement>Files deleted after 24 hours</requirement>
+      <requirement>Database cleanup jobs running</requirement>
+      <requirement>Temp files cleared</requirement>
+      <requirement>No sensitive data in logs</requirement>
+      <requirement>User can request data deletion</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 7 - Security Architecture</section>
+        <snippet>Authentication flow, multi-tenant isolation, data encryption, security headers.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>NFR: Security Requirements</section>
+        <snippet>HTTPS, data encryption, multi-tenant isolation, GDPR compliance.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/main.py</path>
+        <kind>application</kind>
+        <symbol>app</symbol>
+        <reason>Main app - verify CORS and security middleware</reason>
+      </file>
+      <file>
+        <path>backend/app/middleware/auth_middleware.py</path>
+        <kind>middleware</kind>
+        <symbol>get_current_user</symbol>
+        <reason>Auth middleware - verify JWT validation</reason>
+      </file>
+      <file>
+        <path>backend/app/routers/</path>
+        <kind>routers</kind>
+        <symbol>all routers</symbol>
+        <reason>All routers - verify user_id filtering in queries</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <tools>
+        <tool name="SSL Labs" version="online">SSL/TLS testing</tool>
+        <tool name="OWASP ZAP" version="latest">Security scanning</tool>
+        <tool name="pip-audit" version="latest">Python dependency scanning</tool>
+        <tool name="npm audit" version="built-in">Node dependency scanning</tool>
+      </tools>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="security">All traffic must be HTTPS</constraint>
+    <constraint type="security">CORS must only allow production domain</constraint>
+    <constraint type="security">All database queries must filter by user_id</constraint>
+    <constraint type="security">JWT tokens must not appear in logs</constraint>
+    <constraint type="security">Files must be deleted after 24 hours</constraint>
+    <constraint type="compliance">Support user data deletion requests (GDPR)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Security Headers</name>
+      <kind>configuration</kind>
+      <signature>
+        Strict-Transport-Security: max-age=31536000; includeSubDomains
+        Content-Security-Policy: default-src 'self'; script-src 'self'
+        X-Frame-Options: DENY
+        X-Content-Type-Options: nosniff
+        X-XSS-Protection: 1; mode=block
+      </signature>
+      <path>backend/app/middleware/security_headers.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use SSL Labs for HTTPS testing. Use OWASP ZAP for vulnerability scanning.
+      Manual penetration testing for multi-tenant isolation. Dependency scanning with pip-audit and npm audit.
+    </standards>
+    
+    <locations>
+      <location>tests/security/</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-4.3.1">
+        <test>Test SSL Labs grade A+</test>
+        <test>Test HSTS header present</test>
+        <test>Test HTTP redirects to HTTPS</test>
+      </idea>
+      <idea acId="AC-4.3.2">
+        <test>Test CORS rejects unknown origins</test>
+        <test>Test preflight requests work</test>
+      </idea>
+      <idea acId="AC-4.3.3">
+        <test>Test user A cannot access user B's files</test>
+        <test>Test S3 bucket policy</test>
+        <test>Test database query filtering</test>
+      </idea>
+      <idea acId="AC-4.3.4">
+        <test>Test expired JWT rejected</test>
+        <test>Test token refresh works</test>
+        <test>Test no tokens in logs</test>
+      </idea>
+      <idea acId="AC-4.3.5">
+        <test>Test cleanup job runs</test>
+        <test>Test files deleted after 24 hours</test>
+        <test>Test data deletion request</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

@@ -1,0 +1,219 @@
+<story-context id="4-2-performance-optimization" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.2</storyId>
+    <title>Performance Optimization</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-2-performance-optimization.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Developer</asA>
+    <iWant>Optimize TransKeep for performance and scale</iWant>
+    <soThat>The application handles 200+ concurrent users with fast response times and reasonable costs</soThat>
+    
+    <tasks>
+      <task id="1" title="Set Up Load Testing" estimate="1.5h">
+        <subtask>Install k6 for load testing</subtask>
+        <subtask>Create realistic user scenarios</subtask>
+        <subtask>Generate test data (PDFs)</subtask>
+        <subtask>Run 200+ concurrent user test</subtask>
+        <subtask>Analyze results</subtask>
+      </task>
+      
+      <task id="2" title="Optimize PDF Processing" estimate="2h">
+        <subtask>Profile extraction bottlenecks</subtask>
+        <subtask>Optimize PyMuPDF usage</subtask>
+        <subtask>Parallelize page processing</subtask>
+        <subtask>Benchmark processing time</subtask>
+        <subtask>Memory leak testing</subtask>
+      </task>
+      
+      <task id="3" title="Optimize Frontend" estimate="1.5h">
+        <subtask>Audit bundle size with bundleanalyzer</subtask>
+        <subtask>Code split pages</subtask>
+        <subtask>Lazy load components</subtask>
+        <subtask>Optimize images</subtask>
+        <subtask>Test Lighthouse</subtask>
+      </task>
+      
+      <task id="4" title="Database Optimization" estimate="1.5h">
+        <subtask>Add missing indexes</subtask>
+        <subtask>Analyze slow queries</subtask>
+        <subtask>Optimize connection pool</subtask>
+        <subtask>Enable query caching</subtask>
+        <subtask>Monitor performance</subtask>
+      </task>
+      
+      <task id="5" title="Infrastructure Tuning" estimate="1.5h">
+        <subtask>Adjust ECS task size</subtask>
+        <subtask>Configure autoscaling</subtask>
+        <subtask>Optimize CloudFront caching</subtask>
+        <subtask>Enable compression</subtask>
+        <subtask>Monitor resource usage</subtask>
+      </task>
+      
+      <task id="6" title="Cost Analysis" estimate="1h">
+        <subtask>Calculate monthly costs</subtask>
+        <subtask>Identify cost drivers</subtask>
+        <subtask>Optimize expensive operations</subtask>
+        <subtask>Set up cost alerts</subtask>
+        <subtask>Document cost assumptions</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-4.2.1" title="Load Testing">
+      <requirement>Test 200+ concurrent users</requirement>
+      <requirement>Target: &lt;2s response time (p95)</requirement>
+      <requirement>No errors under load</requirement>
+      <requirement>Resource usage acceptable</requirement>
+      <requirement>Database connections pooled</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.2.2" title="PDF Processing">
+      <requirement>500-page PDF in &lt;90 seconds</requirement>
+      <requirement>Memory usage &lt;2GB per job</requirement>
+      <requirement>CPU efficient</requirement>
+      <requirement>Parallelization working</requirement>
+      <requirement>No memory leaks</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.2.3" title="Frontend Performance">
+      <requirement>Initial load &lt;3 seconds</requirement>
+      <requirement>Lighthouse score &gt;90</requirement>
+      <requirement>Bundle size &lt;200KB gzipped</requirement>
+      <requirement>Smooth 60fps interactions</requirement>
+      <requirement>Mobile friendly (LCP &lt;2.5s)</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.2.4" title="Database Performance">
+      <requirement>Queries use proper indexes</requirement>
+      <requirement>No N+1 queries</requirement>
+      <requirement>Connection pooling optimized</requirement>
+      <requirement>Read replicas if needed</requirement>
+      <requirement>Cache hit rate &gt;80%</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.2.5" title="Cost Optimization">
+      <requirement>Cost &lt;$100/month baseline</requirement>
+      <requirement>API costs &lt;$1 per job (DeepL + Claude)</requirement>
+      <requirement>Storage costs minimized</requirement>
+      <requirement>Unused resources removed</requirement>
+      <requirement>Reserved instances for baseline</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>NFR: Performance Requirements</section>
+        <snippet>Response time &lt;2s, 500-page PDF &lt;90s, Lighthouse &gt;90.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 9.1 - Key Metrics to Track</section>
+        <snippet>Response times, error rates, throughput, resource utilization.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/services/pdf_service.py</path>
+        <kind>service</kind>
+        <symbol>PDFService</symbol>
+        <reason>PDF service - optimize extraction performance</reason>
+      </file>
+      <file>
+        <path>backend/app/database.py</path>
+        <kind>service</kind>
+        <symbol>get_db</symbol>
+        <reason>Database - optimize connection pooling</reason>
+      </file>
+      <file>
+        <path>frontend/vite.config.ts</path>
+        <kind>config</kind>
+        <symbol>build</symbol>
+        <reason>Vite config - optimize bundle splitting</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <tools>
+        <tool name="k6" version="latest">Load testing tool</tool>
+        <tool name="webpack-bundle-analyzer" version="^4.10.1">Bundle size analysis</tool>
+      </tools>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="performance">p95 response time &lt;2 seconds</constraint>
+    <constraint type="performance">500-page PDF processing &lt;90 seconds</constraint>
+    <constraint type="performance">Frontend Lighthouse score &gt;90</constraint>
+    <constraint type="performance">Frontend bundle &lt;200KB gzipped</constraint>
+    <constraint type="cost">Infrastructure &lt;$100/month baseline</constraint>
+    <constraint type="cost">Per-job API cost &lt;$1</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Load Test Script</name>
+      <kind>test script</kind>
+      <signature>
+        k6 run --vus 200 --duration 5m load-test.js
+        
+        Scenarios:
+        - upload_pdf: Upload 10MB PDF
+        - check_status: Poll status endpoint
+        - download_pdf: Download translated PDF
+      </signature>
+      <path>tests/load/load-test.js</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use k6 for load testing. Use Lighthouse for frontend audits.
+      Profile with Python cProfile for backend. Memory profiling with tracemalloc.
+    </standards>
+    
+    <locations>
+      <location>tests/load/</location>
+      <location>tests/performance/</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-4.2.1">
+        <test>Load test 200 concurrent users</test>
+        <test>Verify p95 &lt;2s</test>
+        <test>Check no errors under load</test>
+      </idea>
+      <idea acId="AC-4.2.2">
+        <test>Benchmark 500-page PDF</test>
+        <test>Profile memory usage</test>
+        <test>Test for memory leaks</test>
+      </idea>
+      <idea acId="AC-4.2.3">
+        <test>Run Lighthouse audit</test>
+        <test>Check bundle size</test>
+        <test>Test LCP on mobile</test>
+      </idea>
+      <idea acId="AC-4.2.4">
+        <test>Analyze slow queries</test>
+        <test>Check index usage</test>
+        <test>Test cache hit rate</test>
+      </idea>
+      <idea acId="AC-4.2.5">
+        <test>Calculate monthly cost estimate</test>
+        <test>Track API costs per job</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

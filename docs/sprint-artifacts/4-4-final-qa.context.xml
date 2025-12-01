@@ -1,0 +1,219 @@
+<story-context id="4-4-final-qa" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.4</storyId>
+    <title>Final QA & Bug Fixes</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-4-final-qa.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>QA Engineer</asA>
+    <iWant>Conduct comprehensive QA testing before beta launch</iWant>
+    <soThat>All features work correctly across browsers, devices, and edge cases</soThat>
+    
+    <tasks>
+      <task id="1" title="End-to-End Testing" estimate="2h">
+        <subtask>Test complete user flow</subtask>
+        <subtask>Test all features</subtask>
+        <subtask>Verify data persistence</subtask>
+        <subtask>Check error messages</subtask>
+        <subtask>Document any issues</subtask>
+      </task>
+      
+      <task id="2" title="Cross-Browser Testing" estimate="2h">
+        <subtask>Test in Chrome</subtask>
+        <subtask>Test in Firefox</subtask>
+        <subtask>Test in Safari</subtask>
+        <subtask>Check CSS rendering</subtask>
+        <subtask>Verify JS functionality</subtask>
+        <subtask>Test APIs in each browser</subtask>
+      </task>
+      
+      <task id="3" title="Mobile Testing" estimate="1.5h">
+        <subtask>Test on iPhone</subtask>
+        <subtask>Test on Android</subtask>
+        <subtask>Test on iPad</subtask>
+        <subtask>Verify touch interactions</subtask>
+        <subtask>Check responsive design</subtask>
+        <subtask>Test with network throttling</subtask>
+      </task>
+      
+      <task id="4" title="Accessibility Testing" estimate="1.5h">
+        <subtask>Use screen reader</subtask>
+        <subtask>Keyboard navigation</subtask>
+        <subtask>Color contrast check</subtask>
+        <subtask>Form label audit</subtask>
+        <subtask>ARIA attributes verification</subtask>
+        <subtask>Lighthouse accessibility audit</subtask>
+      </task>
+      
+      <task id="5" title="Edge Case Testing" estimate="1.5h">
+        <subtask>Test 500-page PDF</subtask>
+        <subtask>Test with slow connection</subtask>
+        <subtask>Test network interruption recovery</subtask>
+        <subtask>Test browser back button</subtask>
+        <subtask>Test with multiple tabs</subtask>
+        <subtask>Test token expiration</subtask>
+      </task>
+      
+      <task id="6" title="Bug Fixing & Polish" estimate="1.5h">
+        <subtask>Fix all discovered bugs</subtask>
+        <subtask>Polish UI/UX</subtask>
+        <subtask>Improve error messages</subtask>
+        <subtask>Optimize slow operations</subtask>
+        <subtask>Final visual check</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-4.4.1" title="End-to-End Testing">
+      <requirement>Upload PDF → see processing → review translations → download</requirement>
+      <requirement>All flows work without errors</requirement>
+      <requirement>No console errors</requirement>
+      <requirement>All features functional</requirement>
+      <requirement>User data persists</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.4.2" title="Cross-Browser Testing">
+      <requirement>Chrome / Edge (Chromium)</requirement>
+      <requirement>Firefox</requirement>
+      <requirement>Safari (macOS + iOS)</requirement>
+      <requirement>All major browsers work</requirement>
+      <requirement>Consistent experience</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.4.3" title="Mobile Responsiveness">
+      <requirement>Works on iPhone 12/13/14</requirement>
+      <requirement>Works on iPad</requirement>
+      <requirement>Works on Android phones</requirement>
+      <requirement>Touch interactions smooth</requirement>
+      <requirement>No layout issues</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.4.4" title="Accessibility (WCAG 2.1 AA)">
+      <requirement>Screen reader compatible</requirement>
+      <requirement>Keyboard navigation working</requirement>
+      <requirement>Color contrast sufficient</requirement>
+      <requirement>Form labels proper</requirement>
+      <requirement>No accessibility blockers</requirement>
+    </criterion>
+    
+    <criterion id="AC-4.4.5" title="Edge Cases">
+      <requirement>Very large PDFs (500+ pages)</requirement>
+      <requirement>Slow internet (simulate 3G)</requirement>
+      <requirement>Network interruptions</requirement>
+      <requirement>Browser back button</requirement>
+      <requirement>Multiple tabs open</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>NFR: Accessibility Requirements</section>
+        <snippet>WCAG 2.1 AA compliance, screen reader support, keyboard navigation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 9 - Accessibility</section>
+        <snippet>WCAG 2.1 AA compliance, keyboard navigation, screen reader support, color contrast.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>frontend/src/</path>
+        <kind>application</kind>
+        <symbol>all components</symbol>
+        <reason>All frontend components - test across browsers</reason>
+      </file>
+      <file>
+        <path>backend/app/</path>
+        <kind>application</kind>
+        <symbol>all endpoints</symbol>
+        <reason>All backend endpoints - test end-to-end</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <tools>
+        <tool name="BrowserStack" version="online">Cross-browser testing</tool>
+        <tool name="Lighthouse" version="built-in">Performance and accessibility</tool>
+        <tool name="axe DevTools" version="latest">Accessibility testing</tool>
+        <tool name="Chrome DevTools" version="built-in">Network throttling</tool>
+      </tools>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="compatibility">Support Chrome, Firefox, Safari, Edge</constraint>
+    <constraint type="compatibility">Support iOS Safari and Chrome on Android</constraint>
+    <constraint type="accessibility">Meet WCAG 2.1 AA standards</constraint>
+    <constraint type="accessibility">All interactive elements keyboard accessible</constraint>
+    <constraint type="ux">No blocking bugs at launch</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>E2E Test Suite</name>
+      <kind>test suite</kind>
+      <signature>
+        Test scenarios:
+        1. New user signup → upload → translate → download
+        2. Returning user → view history → re-download
+        3. Edit translation → apply tone → download
+        4. Error recovery → retry upload
+        5. Mobile flow → tabs navigation
+      </signature>
+      <path>tests/e2e/</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use Playwright for E2E tests. Use BrowserStack for cross-browser.
+      Use axe-core for accessibility. Manual testing for UX quality.
+    </standards>
+    
+    <locations>
+      <location>tests/e2e/</location>
+      <location>tests/accessibility/</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-4.4.1">
+        <test>E2E test full user flow</test>
+        <test>Check no console errors</test>
+        <test>Verify data persistence</test>
+      </idea>
+      <idea acId="AC-4.4.2">
+        <test>Test in Chrome</test>
+        <test>Test in Firefox</test>
+        <test>Test in Safari</test>
+      </idea>
+      <idea acId="AC-4.4.3">
+        <test>Test on iPhone simulator</test>
+        <test>Test on Android emulator</test>
+        <test>Test touch interactions</test>
+      </idea>
+      <idea acId="AC-4.4.4">
+        <test>Run axe-core accessibility scan</test>
+        <test>Test keyboard navigation</test>
+        <test>Check color contrast</test>
+      </idea>
+      <idea acId="AC-4.4.5">
+        <test>Test 500-page PDF</test>
+        <test>Test with 3G throttling</test>
+        <test>Test browser back button</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

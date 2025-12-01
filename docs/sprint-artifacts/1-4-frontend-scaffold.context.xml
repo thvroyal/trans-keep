@@ -1,0 +1,283 @@
+<story-context id="1-4-frontend-scaffold" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.4</storyId>
+    <title>Frontend Scaffold & shadcn/ui Setup</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-4-frontend-scaffold.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Frontend Developer</asA>
+    <iWant>Set up the frontend application structure with shadcn/ui components, React Router, Zustand state management, and TransKeep's custom design system</iWant>
+    <soThat>The application has a solid foundation with consistent styling, navigation, and state management for all features</soThat>
+    
+    <tasks>
+      <task id="1" title="Install shadcn/ui Components" estimate="1h">
+        <subtask>Run npx shadcn-ui@latest init</subtask>
+        <subtask>Add components: Button, Card, Input, Spinner, Dialog, Progress</subtask>
+        <subtask>Test components with demo UI</subtask>
+        <subtask>Verify component library loads without errors</subtask>
+      </task>
+      
+      <task id="2" title="Set Up React Router" estimate="1.5h">
+        <subtask>Install react-router-dom</subtask>
+        <subtask>Create router configuration</subtask>
+        <subtask>Define 5 main routes</subtask>
+        <subtask>Implement ProtectedRoute component</subtask>
+        <subtask>Test navigation between pages</subtask>
+      </task>
+      
+      <task id="3" title="Create Zustand Store" estimate="1.5h">
+        <subtask>Create store with auth slice</subtask>
+        <subtask>Create store with job slice</subtask>
+        <subtask>Implement localStorage persistence</subtask>
+        <subtask>Add Zustand devtools</subtask>
+        <subtask>Test store with console logs</subtask>
+      </task>
+      
+      <task id="4" title="Configure Tailwind & Design System" estimate="1.5h">
+        <subtask>Create tailwind.config.ts with TransKeep palette</subtask>
+        <subtask>Define color scales (primary, secondary, success, error, warning)</subtask>
+        <subtask>Define typography (fonts, sizes, weights)</subtask>
+        <subtask>Create globals.css with custom utilities</subtask>
+        <subtask>Test responsive breakpoints</subtask>
+      </task>
+      
+      <task id="5" title="Build Page Components" estimate="2.5h">
+        <subtask>Create UploadPage component</subtask>
+        <subtask>Create ProcessingPage component</subtask>
+        <subtask>Create ReviewPage component (placeholder)</subtask>
+        <subtask>Create NotFoundPage component</subtask>
+        <subtask>Create layout/header component</subtask>
+        <subtask>Style all pages with Tailwind</subtask>
+      </task>
+      
+      <task id="6" title="Test & Polish" estimate="1.5h">
+        <subtask>Test all routes work</subtask>
+        <subtask>Test state persistence</subtask>
+        <subtask>Test responsive design (mobile, tablet, desktop)</subtask>
+        <subtask>Test with npm run build</subtask>
+        <subtask>Check lighthouse score</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-1.4.1" title="shadcn/ui Components Installed">
+      <requirement>shadcn/ui CLI initialized</requirement>
+      <requirement>Button, Card, Input, Spinner, Dialog components added</requirement>
+      <requirement>Tailwind CSS configured for shadcn/ui</requirement>
+      <requirement>Component library working with npm run dev</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.4.2" title="React Router Setup">
+      <requirement>React Router v6+ installed</requirement>
+      <requirement>Routes defined: /, /upload, /processing, /review, /auth/callback</requirement>
+      <requirement>Navigation between routes working</requirement>
+      <requirement>Protected routes (authenticated users only)</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.4.3" title="Zustand State Management">
+      <requirement>Zustand store created</requirement>
+      <requirement>User state (authenticated, profile)</requirement>
+      <requirement>CurrentJob state (job_id, status, progress)</requirement>
+      <requirement>Store persists to localStorage</requirement>
+      <requirement>Devtools integration for debugging</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.4.4" title="Tailwind + Custom Palette">
+      <requirement>Tailwind CSS configured</requirement>
+      <requirement>TransKeep color palette defined in tailwind.config.ts</requirement>
+      <requirement>Spacing, typography standards applied</requirement>
+      <requirement>Responsive design working (mobile-first)</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.4.5" title="Project Layout">
+      <requirement>Upload page (file drop zone)</requirement>
+      <requirement>Processing page (status + progress)</requirement>
+      <requirement>Review page (dual PDF viewer placeholder)</requirement>
+      <requirement>404 page</requirement>
+      <requirement>All pages navigable and styled</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 2 - Visual Foundation</section>
+        <snippet>Complete color palette, typography system, spacing scale, shadows, and animation tokens for TransKeep's "Confident Clarity" design.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 4 - Key Screens & Layouts</section>
+        <snippet>Upload screen, Processing screen, Review screen specifications with layout details and component placement.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 10.2 - Tailwind Configuration</section>
+        <snippet>Complete tailwind.config.js with TransKeep colors, fonts, spacing, shadows, and custom utilities.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 2.2 - Frontend Project Structure</section>
+        <snippet>React project structure with components/, pages/, hooks/, services/, stores/ directories.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 2.4 - State Management (Zustand)</section>
+        <snippet>Zustand store interface with user, currentJob, and UI state slices.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>frontend/src/App.tsx</path>
+        <kind>component</kind>
+        <symbol>App</symbol>
+        <reason>Main app component where router will be configured</reason>
+      </file>
+      <file>
+        <path>frontend/src/main.tsx</path>
+        <kind>entry</kind>
+        <symbol>main</symbol>
+        <reason>Entry point where providers will be wrapped</reason>
+      </file>
+      <file>
+        <path>frontend/package.json</path>
+        <kind>config</kind>
+        <symbol>dependencies</symbol>
+        <reason>Add shadcn/ui, react-router-dom, zustand dependencies</reason>
+      </file>
+      <file>
+        <path>frontend/tailwind.config.js</path>
+        <kind>config</kind>
+        <symbol>theme</symbol>
+        <reason>Extend with TransKeep design tokens</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <npm>
+        <package name="react-router-dom" version="^6.20.0">Client-side routing</package>
+        <package name="zustand" version="^4.4.7">State management</package>
+        <package name="@radix-ui/react-dialog" version="latest">Dialog primitive for shadcn/ui</package>
+        <package name="@radix-ui/react-progress" version="latest">Progress primitive for shadcn/ui</package>
+        <package name="class-variance-authority" version="latest">Component variants for shadcn/ui</package>
+        <package name="clsx" version="latest">Conditional class names</package>
+        <package name="tailwind-merge" version="latest">Merge Tailwind classes</package>
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="design">Follow TransKeep UX Design Specification exactly</constraint>
+    <constraint type="design">Use "Confident Clarity" design philosophy</constraint>
+    <constraint type="design">Primary color: #0066FF (Confident Blue)</constraint>
+    <constraint type="design">Background: #FAFAFA, Card: #FFFFFF</constraint>
+    <constraint type="design">Font: Inter (system fallback)</constraint>
+    <constraint type="pattern">Mobile-first responsive design</constraint>
+    <constraint type="pattern">Use Zustand for all global state (no prop drilling)</constraint>
+    <constraint type="pattern">Use shadcn/ui components as base (customize via Tailwind)</constraint>
+    <constraint type="accessibility">All components must be keyboard navigable</constraint>
+    <constraint type="accessibility">Color contrast must meet WCAG AA (4.5:1)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>App Router</name>
+      <kind>React Router config</kind>
+      <signature>
+        / - Landing/Home (redirect to /upload if authenticated)
+        /upload - Upload page
+        /processing/:jobId - Processing status page
+        /review/:jobId - Review page (hero)
+        /auth/callback - OAuth callback
+        * - 404 Not Found
+      </signature>
+      <path>frontend/src/router.tsx</path>
+    </interface>
+    <interface>
+      <name>AppStore</name>
+      <kind>Zustand store</kind>
+      <signature>
+        interface AppStore {
+          // Auth
+          user: User | null
+          isAuthenticated: boolean
+          setUser: (user: User | null) => void
+          
+          // Current Job
+          currentJob: Job | null
+          setCurrentJob: (job: Job | null) => void
+          
+          // UI
+          reviewPanelSync: boolean
+          toggleSync: () => void
+        }
+      </signature>
+      <path>frontend/src/store/appStore.ts</path>
+    </interface>
+    <interface>
+      <name>Layout Component</name>
+      <kind>React component</kind>
+      <signature>
+        const Layout: React.FC&lt;{ children: React.ReactNode }&gt;
+        - Header with logo, nav, user menu
+        - Main content area
+        - Optional footer
+      </signature>
+      <path>frontend/src/components/Layout.tsx</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use Vitest for unit tests. Use React Testing Library for component tests.
+      Test routing with MemoryRouter. Test Zustand store with direct state manipulation.
+      Visual regression testing optional for MVP.
+    </standards>
+    
+    <locations>
+      <location>frontend/src/__tests__/</location>
+      <location>frontend/src/pages/__tests__/</location>
+      <location>frontend/src/store/__tests__/</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-1.4.1">
+        <test>Test Button component renders with all variants</test>
+        <test>Test Card component renders children</test>
+        <test>Test Dialog opens and closes</test>
+      </idea>
+      <idea acId="AC-1.4.2">
+        <test>Test navigation to /upload renders UploadPage</test>
+        <test>Test protected route redirects unauthenticated users</test>
+        <test>Test 404 page renders for unknown routes</test>
+      </idea>
+      <idea acId="AC-1.4.3">
+        <test>Test setUser updates store state</test>
+        <test>Test store persists to localStorage</test>
+        <test>Test store rehydrates on page load</test>
+      </idea>
+      <idea acId="AC-1.4.4">
+        <test>Test Tailwind classes apply correctly</test>
+        <test>Test responsive breakpoints work</test>
+      </idea>
+      <idea acId="AC-1.4.5">
+        <test>Test UploadPage renders drop zone</test>
+        <test>Test ProcessingPage shows progress</test>
+        <test>Test ReviewPage renders placeholder</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

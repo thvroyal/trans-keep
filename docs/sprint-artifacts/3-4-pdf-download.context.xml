@@ -1,0 +1,255 @@
+<story-context id="3-4-pdf-download" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.4</storyId>
+    <title>PDF Download Endpoint</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-4-pdf-download.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>Download my translated PDF with all my edits applied</iWant>
+    <soThat>I can use the final document for my intended purpose</soThat>
+    
+    <tasks>
+      <task id="1" title="Create PDF Reconstruction Logic" estimate="2h">
+        <subtask>Load original PDF blocks</subtask>
+        <subtask>Apply translated text to coordinates</subtask>
+        <subtask>Apply user edits (overwrite translated)</subtask>
+        <subtask>Handle font and layout</subtask>
+        <subtask>Test with various PDFs</subtask>
+      </task>
+      
+      <task id="2" title="Implement Download Endpoint" estimate="1.5h">
+        <subtask>Create GET /api/v1/download/{job_id}</subtask>
+        <subtask>Verify user owns translation</subtask>
+        <subtask>Call reconstruction service</subtask>
+        <subtask>Upload to S3</subtask>
+        <subtask>Return pre-signed URL</subtask>
+      </task>
+      
+      <task id="3" title="Add Frontend UI" estimate="1.5h">
+        <subtask>Create download button</subtask>
+        <subtask>Show download progress</subtask>
+        <subtask>Handle download completion</subtask>
+        <subtask>Handle errors</subtask>
+        <subtask>Track download analytics</subtask>
+      </task>
+      
+      <task id="4" title="S3 & CloudFront Setup" estimate="1.5h">
+        <subtask>Configure S3 bucket for downloads</subtask>
+        <subtask>Set up CloudFront distribution</subtask>
+        <subtask>Configure cache headers</subtask>
+        <subtask>Test download speed</subtask>
+        <subtask>Verify CDN working</subtask>
+      </task>
+      
+      <task id="5" title="File Cleanup Jobs" estimate="1h">
+        <subtask>Create Celery beat task</subtask>
+        <subtask>Delete files older than 24 hours</subtask>
+        <subtask>Run every hour</subtask>
+        <subtask>Track cleanup stats</subtask>
+        <subtask>Alert on failures</subtask>
+      </task>
+      
+      <task id="6" title="Testing & Performance" estimate="1.5h">
+        <subtask>Test download with small PDF</subtask>
+        <subtask>Test download with 500-page PDF</subtask>
+        <subtask>Verify edits preserved</subtask>
+        <subtask>Test CloudFront CDN</subtask>
+        <subtask>Load test concurrent downloads</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-3.4.1" title="Download Endpoint">
+      <requirement>GET /api/v1/download/{job_id} returns presigned URL</requirement>
+      <requirement>PDF properly reconstructed with translations</requirement>
+      <requirement>User edits applied to final PDF</requirement>
+      <requirement>Requires authentication</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.4.2" title="PDF Reconstruction">
+      <requirement>Uses original PDF + translated blocks</requirement>
+      <requirement>Applies user edits from frontend</requirement>
+      <requirement>Preserves original layout and formatting</requirement>
+      <requirement>Handles multi-page PDFs</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.4.3" title="S3 Integration">
+      <requirement>Final PDF stored in S3</requirement>
+      <requirement>Pre-signed URL valid for 1 hour</requirement>
+      <requirement>CloudFront distribution for CDN</requirement>
+      <requirement>Browser downloads directly</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.4.4" title="File Management">
+      <requirement>Original PDF cleaned up after 24 hours</requirement>
+      <requirement>Final PDF cleaned up after 24 hours</requirement>
+      <requirement>User can download multiple times</requirement>
+      <requirement>Storage optimized</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.4.5" title="Frontend Integration">
+      <requirement>Download button on review page</requirement>
+      <requirement>Shows download progress</requirement>
+      <requirement>Error handling</requirement>
+      <requirement>Success notification</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 4.5 - PDF Editing Flow</section>
+        <snippet>PDF reconstruction on download: merge original layout + translated text + user edits.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 5.1 - API Endpoints</section>
+        <snippet>GET /api/v1/download/{job_id} - returns pre-signed S3 URL for download.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR61-70: Download & Export</section>
+        <snippet>Download translated PDF, preserve formatting, apply all edits, CDN delivery.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/services/pdf_service.py</path>
+        <kind>service</kind>
+        <symbol>PDFService</symbol>
+        <reason>PDF service from Story 2.2 - extend with reconstruction</reason>
+      </file>
+      <file>
+        <path>backend/app/services/s3_service.py</path>
+        <kind>service</kind>
+        <symbol>S3Service</symbol>
+        <reason>S3 service from Story 2.1 - upload final PDF</reason>
+      </file>
+      <file>
+        <path>frontend/src/components/ReviewPanel.tsx</path>
+        <kind>component</kind>
+        <symbol>ReviewPanel</symbol>
+        <reason>Review panel - add download button</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="PyMuPDF" version="1.23.7">PDF reconstruction with fitz</package>
+        <package name="boto3" version="1.33.0">S3 upload and pre-signed URLs</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Reconstruct PDF only on download (not on every edit)</constraint>
+    <constraint type="architecture">Send user edits from frontend in download request</constraint>
+    <constraint type="storage">Pre-signed URLs valid for 1 hour</constraint>
+    <constraint type="storage">Cleanup files after 24 hours</constraint>
+    <constraint type="performance">Use CloudFront CDN for fast downloads</constraint>
+    <constraint type="security">Verify user owns the translation before download</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Download Endpoint</name>
+      <kind>REST API</kind>
+      <signature>
+        POST /api/v1/download/{job_id}
+        Authorization: Bearer {jwt_token}
+        Body: { edits: Array&lt;{ blockId: number, text: string }&gt; }
+        
+        Response 200:
+        {
+          "download_url": "https://cdn.transkeep.com/...",
+          "expires_at": "ISO8601",
+          "file_size": 12345678
+        }
+        
+        Response 404: Job not found
+        Response 403: Not authorized
+      </signature>
+      <path>backend/app/routers/download.py</path>
+    </interface>
+    <interface>
+      <name>PDF Reconstruction Service</name>
+      <kind>service</kind>
+      <signature>
+        class PDFReconstructionService:
+            def reconstruct_pdf(
+                original_pdf_path: str,
+                translated_blocks: List[TranslatedBlock],
+                user_edits: Dict[int, str]  # blockId → edited text
+            ) -> bytes
+      </signature>
+      <path>backend/app/services/pdf_reconstruction.py</path>
+    </interface>
+    <interface>
+      <name>Download Button Component</name>
+      <kind>React component</kind>
+      <signature>
+        interface DownloadButtonProps {
+          jobId: string
+          edits: Map&lt;number, string&gt;
+          onDownloadStart: () => void
+          onDownloadComplete: (url: string) => void
+          onError: (error: string) => void
+        }
+      </signature>
+      <path>frontend/src/components/DownloadButton.tsx</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest for backend tests. Mock S3 with moto. Test PDF reconstruction with sample PDFs.
+      Test CloudFront URLs work. Test cleanup job runs correctly.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_download.py</location>
+      <location>backend/tests/test_pdf_reconstruction.py</location>
+      <location>frontend/src/components/__tests__/DownloadButton.test.tsx</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-3.4.1">
+        <test>Test download endpoint returns pre-signed URL</test>
+        <test>Test requires authentication</test>
+        <test>Test 403 for unauthorized user</test>
+      </idea>
+      <idea acId="AC-3.4.2">
+        <test>Test PDF contains translated text</test>
+        <test>Test user edits are applied</test>
+        <test>Test layout preserved</test>
+      </idea>
+      <idea acId="AC-3.4.3">
+        <test>Test file uploaded to S3</test>
+        <test>Test pre-signed URL works</test>
+        <test>Test URL expires after 1 hour</test>
+      </idea>
+      <idea acId="AC-3.4.4">
+        <test>Test cleanup job deletes old files</test>
+        <test>Test user can download multiple times</test>
+      </idea>
+      <idea acId="AC-3.4.5">
+        <test>Test download button triggers API call</test>
+        <test>Test progress indicator</test>
+        <test>Test error handling</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

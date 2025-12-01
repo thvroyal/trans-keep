@@ -1,0 +1,260 @@
+<story-context id="3-1-side-by-side-review" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.1</storyId>
+    <title>Side-by-Side Review Panel (Hero Component)</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-1-side-by-side-review.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>View my original and translated documents side-by-side with synchronized scrolling and hover highlighting</iWant>
+    <soThat>I can easily compare translations, verify accuracy, and identify corresponding text blocks without manual coordination</soThat>
+    
+    <tasks>
+      <task id="1" title="Set Up pdf.js" estimate="2h">
+        <subtask>Install pdf.js library</subtask>
+        <subtask>Create PDFViewer component</subtask>
+        <subtask>Render PDFs with page controls</subtask>
+        <subtask>Handle page-by-page rendering</subtask>
+        <subtask>Test with various PDF sizes</subtask>
+      </task>
+      
+      <task id="2" title="Implement Dual Viewer" estimate="2h">
+        <subtask>Create ReviewPanel component (main container)</subtask>
+        <subtask>Render original PDF on left</subtask>
+        <subtask>Render translated PDF on right</subtask>
+        <subtask>Add page number synchronization</subtask>
+        <subtask>Test both PDFs render correctly</subtask>
+      </task>
+      
+      <task id="3" title="Add Synchronized Scrolling" estimate="2h">
+        <subtask>Create scroll position state (Zustand)</subtask>
+        <subtask>Detect scroll events on left</subtask>
+        <subtask>Update right panel scroll position</subtask>
+        <subtask>Prevent infinite loops</subtask>
+        <subtask>Add toggle button for on/off</subtask>
+        <subtask>Test smooth synchronization</subtask>
+      </task>
+      
+      <task id="4" title="Implement Hover Highlighting" estimate="2h">
+        <subtask>Create mapping of text blocks between PDFs</subtask>
+        <subtask>On hover: highlight block in both PDFs</subtask>
+        <subtask>Use visual effect (border or background)</subtask>
+        <subtask>Make highlighting performant</subtask>
+        <subtask>Test with various block sizes</subtask>
+      </task>
+      
+      <task id="5" title="Make Responsive" estimate="1.5h">
+        <subtask>Create responsive layout component</subtask>
+        <subtask>Desktop: dual column layout</subtask>
+        <subtask>Tablet: adjust column widths</subtask>
+        <subtask>Mobile: tab-based navigation</subtask>
+        <subtask>Test on multiple screen sizes</subtask>
+      </task>
+      
+      <task id="6" title="Performance Optimization" estimate="2h">
+        <subtask>Implement virtual scrolling for large PDFs</subtask>
+        <subtask>Optimize re-renders</subtask>
+        <subtask>Lazy load pages not in viewport</subtask>
+        <subtask>Benchmark performance</subtask>
+        <subtask>Optimize bundle size</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-3.1.1" title="Dual PDF Rendering">
+      <requirement>Original PDF rendered on left (pdf.js)</requirement>
+      <requirement>Translated PDF rendered on right (pdf.js)</requirement>
+      <requirement>Both PDFs scroll independently</requirement>
+      <requirement>Zoom controls for both</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.1.2" title="Synchronized Scrolling">
+      <requirement>Default: synchronized scrolling ON</requirement>
+      <requirement>Toggle button to turn ON/OFF</requirement>
+      <requirement>When ON: scrolling left syncs right and vice versa</requirement>
+      <requirement>Smooth synchronization without lag</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.1.3" title="Hover Highlighting">
+      <requirement>Hover over text block → highlight both sides</requirement>
+      <requirement>Block-level mapping visualized</requirement>
+      <requirement>Visual feedback immediate</requirement>
+      <requirement>Works on mobile (touch equivalent)</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.1.4" title="Responsive Design">
+      <requirement>Desktop: side-by-side (50/50 split)</requirement>
+      <requirement>Tablet: side-by-side (stacked vertically)</requirement>
+      <requirement>Mobile: tabs (switch between original/translated)</requirement>
+      <requirement>All interactions remain smooth</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.1.5" title="Performance">
+      <requirement>500-page PDF loads smoothly</requirement>
+      <requirement>No lag during scrolling</requirement>
+      <requirement>Highlighting instant (&lt;50ms)</requirement>
+      <requirement>Memory usage reasonable</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 3 - Core User Experience</section>
+        <snippet>Side-by-side review as hero feature, synchronized scrolling, hover highlighting, block-level mapping.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 4.3 - Review Screen</section>
+        <snippet>Dual-panel layout, sync toggle, zoom controls, edit panel, download button placement.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR31-40: Review & Comparison</section>
+        <snippet>Side-by-side comparison, synchronized scrolling, hover highlighting, block-level mapping.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-3-tech-stack.md</path>
+        <title>Epic 3 Tech Stack</title>
+        <section>PDF Rendering Technologies</section>
+        <snippet>pdf.js for rendering, virtual scrolling, canvas optimization, block overlay system.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>frontend/src/pages/ReviewPage.tsx</path>
+        <kind>component</kind>
+        <symbol>ReviewPage</symbol>
+        <reason>Review page placeholder from Story 1.4 - will be enhanced</reason>
+      </file>
+      <file>
+        <path>frontend/src/store/appStore.ts</path>
+        <kind>store</kind>
+        <symbol>reviewPanelSync</symbol>
+        <reason>Zustand store - add scroll position and sync state</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <npm>
+        <package name="pdfjs-dist" version="^4.0.379">PDF.js library for rendering</package>
+        <package name="react-virtuoso" version="^4.6.2">Virtual scrolling for large lists</package>
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="performance">500-page PDF must load without freezing</constraint>
+    <constraint type="performance">Highlighting response time &lt;50ms</constraint>
+    <constraint type="performance">Use virtual scrolling - only render visible pages</constraint>
+    <constraint type="performance">Debounce scroll events (100ms)</constraint>
+    <constraint type="ux">Default synchronized scrolling to ON</constraint>
+    <constraint type="ux">Mobile: use tabs instead of side-by-side</constraint>
+    <constraint type="design">Follow UX Design Specification exactly</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>ReviewPanel Component</name>
+      <kind>React component</kind>
+      <signature>
+        interface ReviewPanelProps {
+          jobId: string
+          originalPdfUrl: string
+          translatedPdfUrl: string
+          blocks: BlockMapping[]
+        }
+        
+        interface BlockMapping {
+          blockId: number
+          page: number
+          originalCoords: Coordinates
+          translatedCoords: Coordinates
+        }
+      </signature>
+      <path>frontend/src/components/ReviewPanel.tsx</path>
+    </interface>
+    <interface>
+      <name>PDFViewer Component</name>
+      <kind>React component</kind>
+      <signature>
+        interface PDFViewerProps {
+          url: string
+          onScroll: (scrollTop: number, scrollLeft: number) => void
+          scrollPosition?: { top: number, left: number }
+          onBlockHover?: (blockId: number | null) => void
+          highlightedBlock?: number | null
+          zoom: number
+        }
+      </signature>
+      <path>frontend/src/components/PDFViewer.tsx</path>
+    </interface>
+    <interface>
+      <name>Review Store Slice</name>
+      <kind>Zustand slice</kind>
+      <signature>
+        interface ReviewState {
+          syncEnabled: boolean
+          toggleSync: () => void
+          scrollPosition: { top: number, left: number }
+          setScrollPosition: (pos: { top: number, left: number }) => void
+          hoveredBlock: number | null
+          setHoveredBlock: (blockId: number | null) => void
+          zoom: number
+          setZoom: (zoom: number) => void
+        }
+      </signature>
+      <path>frontend/src/store/reviewSlice.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use Vitest and React Testing Library. Test PDF rendering with mock pdf.js.
+      Test scroll synchronization with mock scroll events. Performance tests with large PDFs.
+    </standards>
+    
+    <locations>
+      <location>frontend/src/components/__tests__/ReviewPanel.test.tsx</location>
+      <location>frontend/src/components/__tests__/PDFViewer.test.tsx</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-3.1.1">
+        <test>Test both PDFs render with correct URLs</test>
+        <test>Test zoom controls work</test>
+        <test>Test independent scrolling when sync off</test>
+      </idea>
+      <idea acId="AC-3.1.2">
+        <test>Test sync toggle changes state</test>
+        <test>Test scrolling left updates right when sync on</test>
+        <test>Test no infinite scroll loop</test>
+      </idea>
+      <idea acId="AC-3.1.3">
+        <test>Test hover highlights both panels</test>
+        <test>Test highlight clears on mouse leave</test>
+        <test>Test touch events on mobile</test>
+      </idea>
+      <idea acId="AC-3.1.4">
+        <test>Test responsive layout changes at breakpoints</test>
+        <test>Test mobile tab navigation</test>
+      </idea>
+      <idea acId="AC-3.1.5">
+        <test>Benchmark render time for 500-page PDF</test>
+        <test>Test memory usage stays reasonable</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

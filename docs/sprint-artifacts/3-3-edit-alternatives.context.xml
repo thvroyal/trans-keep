@@ -1,0 +1,250 @@
+<story-context id="3-3-edit-alternatives" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.3</storyId>
+    <title>Edit & Alternatives Workflow</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-3-edit-alternatives.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>Edit translated text, get AI-generated alternatives, and re-translate sections with custom tone</iWant>
+    <soThat>I can refine translations to perfectly match my needs without starting over</soThat>
+    
+    <tasks>
+      <task id="1" title="Create EditPanel Component" estimate="1.5h">
+        <subtask>Design edit interface</subtask>
+        <subtask>Inline text editor</subtask>
+        <subtask>Save/cancel buttons</subtask>
+        <subtask>Character limit indicator</subtask>
+        <subtask>Keyboard shortcuts</subtask>
+      </task>
+      
+      <task id="2" title="Implement Alternatives Generation" estimate="1.5h">
+        <subtask>Create get_alternatives() endpoint</subtask>
+        <subtask>Call Claude to generate options</subtask>
+        <subtask>Show 2-3 alternatives</subtask>
+        <subtask>Add quick-select buttons</subtask>
+        <subtask>Cache alternatives</subtask>
+      </task>
+      
+      <task id="3" title="Build Re-translation Logic" estimate="1.5h">
+        <subtask>Create re_translate endpoint</subtask>
+        <subtask>Support custom tone parameter</subtask>
+        <subtask>Apply tone to edited text</subtask>
+        <subtask>Compare with original</subtask>
+        <subtask>Store best version</subtask>
+      </task>
+      
+      <task id="4" title="Add Edit Tracking" estimate="1h">
+        <subtask>Create edit tracker in Zustand</subtask>
+        <subtask>Track block_id → edited_text</subtask>
+        <subtask>Mark edited blocks visually</subtask>
+        <subtask>Persist across sessions</subtask>
+        <subtask>Clear all edits button</subtask>
+      </task>
+      
+      <task id="5" title="Integrate with Review Panel" estimate="1.5h">
+        <subtask>Show edit indicators</subtask>
+        <subtask>Click to edit</subtask>
+        <subtask>Live preview of edits</subtask>
+        <subtask>Sync edits with API</subtask>
+        <subtask>Handle conflicts</subtask>
+      </task>
+      
+      <task id="6" title="Testing & Polish" estimate="1.5h">
+        <subtask>Test edit flow end-to-end</subtask>
+        <subtask>Test alternatives quality</subtask>
+        <subtask>Test re-translation accuracy</subtask>
+        <subtask>Performance with many edits</subtask>
+        <subtask>Cross-browser testing</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-3.3.1" title="Edit Panel">
+      <requirement>Click-to-edit on translated text</requirement>
+      <requirement>Inline text editor</requirement>
+      <requirement>Save/cancel options</requirement>
+      <requirement>Real-time preview in review panel</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.3.2" title="Alternatives">
+      <requirement>Generate 2-3 alternative translations</requirement>
+      <requirement>Show via Claude API</requirement>
+      <requirement>Quick-select buttons</requirement>
+      <requirement>Each alternative editable</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.3.3" title="Re-translation">
+      <requirement>Re-translate edited text</requirement>
+      <requirement>Apply custom tone to re-translation</requirement>
+      <requirement>Compare with original translation</requirement>
+      <requirement>Keep best version</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.3.4" title="In-Memory Tracking">
+      <requirement>Track all user edits in Zustand store</requirement>
+      <requirement>Distinguish original vs edited</requirement>
+      <requirement>Persist edits until download</requirement>
+      <requirement>Clear edits option</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.3.5" title="Integration">
+      <requirement>Edits reflected in final PDF</requirement>
+      <requirement>Works with tone customization</requirement>
+      <requirement>Non-destructive (original preserved)</requirement>
+      <requirement>Edits visible in review panel</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 4.5 - PDF Editing Flow</section>
+        <snippet>In-memory edit tracking with Zustand, PDF reconstruction only on download for optimal performance.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR51-60: Editing & Refinement</section>
+        <snippet>Inline editing, AI alternatives, re-translation with tone, edit history.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 6.3 - Edit Panel Components</section>
+        <snippet>EditPanel design, inline editor, alternatives display, save/cancel actions.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>frontend/src/components/ReviewPanel.tsx</path>
+        <kind>component</kind>
+        <symbol>ReviewPanel</symbol>
+        <reason>Review panel from Story 3.1 - integrate edit functionality</reason>
+      </file>
+      <file>
+        <path>frontend/src/store/appStore.ts</path>
+        <kind>store</kind>
+        <symbol>AppStore</symbol>
+        <reason>Zustand store - add edit tracking slice</reason>
+      </file>
+      <file>
+        <path>backend/app/services/tone_service.py</path>
+        <kind>service</kind>
+        <symbol>ToneService</symbol>
+        <reason>Tone service from Story 3.2 - use for re-translation</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <npm>
+        <package name="zustand" version="^4.4.7">State management with persistence</package>
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Track edits in-memory only (no server round-trip per edit)</constraint>
+    <constraint type="architecture">PDF reconstruction happens only on download</constraint>
+    <constraint type="architecture">Original translation always preserved (non-destructive)</constraint>
+    <constraint type="ux">Edits must be visually distinguishable from original</constraint>
+    <constraint type="ux">Persist edits across browser sessions (localStorage)</constraint>
+    <constraint type="performance">Edit tracking must not impact scroll performance</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>EditPanel Component</name>
+      <kind>React component</kind>
+      <signature>
+        interface EditPanelProps {
+          blockId: number
+          originalText: string
+          translatedText: string
+          onSave: (text: string) => void
+          onCancel: () => void
+          onGetAlternatives: () => Promise&lt;string[]&gt;
+        }
+      </signature>
+      <path>frontend/src/components/EditPanel.tsx</path>
+    </interface>
+    <interface>
+      <name>Edit Store Slice</name>
+      <kind>Zustand slice</kind>
+      <signature>
+        interface EditState {
+          edits: Map&lt;number, EditedBlock&gt;  // blockId → edit
+          setEdit: (blockId: number, text: string) => void
+          clearEdit: (blockId: number) => void
+          clearAllEdits: () => void
+          hasEdits: boolean
+        }
+        
+        interface EditedBlock {
+          originalText: string
+          editedText: string
+          editedAt: Date
+        }
+      </signature>
+      <path>frontend/src/store/editSlice.ts</path>
+    </interface>
+    <interface>
+      <name>Alternatives Endpoint</name>
+      <kind>REST API</kind>
+      <signature>
+        POST /api/v1/alternatives
+        Body: { text: string, target_lang: string, count: number }
+        Response: { alternatives: string[] }
+      </signature>
+      <path>backend/app/routers/alternatives.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use React Testing Library for edit panel tests. Test Zustand store with direct manipulation.
+      Mock Claude API for alternatives. Integration test full edit flow.
+    </standards>
+    
+    <locations>
+      <location>frontend/src/components/__tests__/EditPanel.test.tsx</location>
+      <location>frontend/src/store/__tests__/editSlice.test.ts</location>
+      <location>backend/tests/test_alternatives.py</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-3.3.1">
+        <test>Test click-to-edit opens editor</test>
+        <test>Test save updates store</test>
+        <test>Test cancel discards changes</test>
+      </idea>
+      <idea acId="AC-3.3.2">
+        <test>Test alternatives API returns 2-3 options</test>
+        <test>Test quick-select updates text</test>
+      </idea>
+      <idea acId="AC-3.3.3">
+        <test>Test re-translation with tone</test>
+        <test>Test comparison shows diff</test>
+      </idea>
+      <idea acId="AC-3.3.4">
+        <test>Test edits stored in Zustand</test>
+        <test>Test edits persist to localStorage</test>
+        <test>Test clear all edits works</test>
+      </idea>
+      <idea acId="AC-3.3.5">
+        <test>Test edits reflected in PDF download</test>
+        <test>Test original text preserved</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

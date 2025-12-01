@@ -1,0 +1,218 @@
+<story-context id="2-3-deepl-translation" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.3</storyId>
+    <title>DeepL Translation Integration</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-3-deepl-translation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>System</asA>
+    <iWant>Translate extracted text blocks using DeepL API with batch processing</iWant>
+    <soThat>Users get high-quality translations efficiently and cost-effectively</soThat>
+    
+    <tasks>
+      <task id="1" title="Set Up DeepL Client" estimate="1h">
+        <subtask>Install deepl-python package</subtask>
+        <subtask>Store API key in .env</subtask>
+        <subtask>Create translation service module</subtask>
+        <subtask>Test basic translation</subtask>
+      </task>
+      
+      <task id="2" title="Implement Batch Translation" estimate="1.5h">
+        <subtask>Create batch_translate() function</subtask>
+        <subtask>Group blocks into batches of 10</subtask>
+        <subtask>Call DeepL API for each batch</subtask>
+        <subtask>Optimize batch size for cost/speed</subtask>
+      </task>
+      
+      <task id="3" title="Add Parallelization" estimate="2h">
+        <subtask>Create Celery tasks for page-level translation</subtask>
+        <subtask>Use worker pool for parallel processing</subtask>
+        <subtask>Orchestrate task flow (extract → translate)</subtask>
+        <subtask>Monitor costs</subtask>
+      </task>
+      
+      <task id="4" title="Implement Error Handling" estimate="1.5h">
+        <subtask>Catch rate limit errors</subtask>
+        <subtask>Implement exponential backoff retry</subtask>
+        <subtask>Log all API calls</subtask>
+        <subtask>Handle timeout scenarios</subtask>
+      </task>
+      
+      <task id="5" title="Integrate with Pipeline" estimate="1.5h">
+        <subtask>Connect to Story 2.2 extracted blocks</subtask>
+        <subtask>Store translations in database</subtask>
+        <subtask>Update translation status</subtask>
+        <subtask>Handle partial failures</subtask>
+      </task>
+      
+      <task id="6" title="Cost & Performance Testing" estimate="1.5h">
+        <subtask>Test with 10-page document</subtask>
+        <subtask>Test with 100-page document</subtask>
+        <subtask>Track API costs</subtask>
+        <subtask>Verify quality of translation</subtask>
+        <subtask>Benchmark execution time</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-2.3.1" title="DeepL API Integration">
+      <requirement>DeepL Python client installed and configured</requirement>
+      <requirement>API key stored in environment variables</requirement>
+      <requirement>Translation endpoint working with EN→JA, EN→VI, EN→ZH</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.3.2" title="Batch Translation">
+      <requirement>Implement batch processing (10 blocks per request)</requirement>
+      <requirement>Reduce API calls and costs</requirement>
+      <requirement>Handle variable batch sizes</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.3.3" title="Parallelization">
+      <requirement>Process multiple pages in parallel</requirement>
+      <requirement>Use Celery worker pool</requirement>
+      <requirement>Maintain cost budget (&lt;$0.15 per job)</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.3.4" title="Error Handling">
+      <requirement>Handle API rate limiting with backoff</requirement>
+      <requirement>Retry failed translations</requirement>
+      <requirement>Graceful degradation if API unavailable</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.3.5" title="Integration">
+      <requirement>Integrated with Celery pipeline</requirement>
+      <requirement>Receives extracted blocks from Story 2.2</requirement>
+      <requirement>Returns translated blocks to database</requirement>
+      <requirement>Ready for Story 2.4</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 4.3 - Translation Pipeline</section>
+        <snippet>DeepL API for base translation, batch processing, cost optimization, retry logic.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR21-30: Translation Processing</section>
+        <snippet>High-quality translation, support EN/JA/VI/ZH, batch processing for efficiency.</snippet>
+      </doc>
+      <doc>
+        <path>docs/technical-refinements.md</path>
+        <title>Technical Refinements</title>
+        <section>Translation Engine Selection</section>
+        <snippet>DeepL chosen for quality, Claude 3.5 Haiku for tone customization layer.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/services/pdf_service.py</path>
+        <kind>service</kind>
+        <symbol>Block</symbol>
+        <reason>Block dataclass from Story 2.2 - input for translation</reason>
+      </file>
+      <file>
+        <path>backend/app/tasks/extract_pdf.py</path>
+        <kind>task</kind>
+        <symbol>extract_pdf_task</symbol>
+        <reason>Extraction task - translation task chains after this</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="deepl" version="1.16.1">DeepL Python client</package>
+        <package name="tenacity" version="8.2.3">Retry logic with exponential backoff</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="cost">Target &lt;$0.15 per translation job</constraint>
+    <constraint type="cost">Batch 10 blocks per API call to reduce overhead</constraint>
+    <constraint type="performance">Process pages in parallel using Celery workers</constraint>
+    <constraint type="api">Handle DeepL rate limits (exponential backoff)</constraint>
+    <constraint type="api">Log all API calls for cost tracking</constraint>
+    <constraint type="languages">Support EN→JA, EN→VI, EN→ZH initially</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Translation Service</name>
+      <kind>service</kind>
+      <signature>
+        class TranslationService:
+            def __init__(self, api_key: str)
+            async def translate_text(text: str, source_lang: str, target_lang: str) -> str
+            async def batch_translate(blocks: List[Block], source_lang: str, target_lang: str) -> List[TranslatedBlock]
+            def get_usage() -> DeepLUsage
+        
+        @dataclass
+        class TranslatedBlock:
+            original: Block
+            translated_text: str
+            source_lang: str
+            target_lang: str
+      </signature>
+      <path>backend/app/services/translation_service.py</path>
+    </interface>
+    <interface>
+      <name>Translate Blocks Task</name>
+      <kind>Celery task</kind>
+      <signature>
+        @celery_app.task(bind=True, max_retries=3, rate_limit='10/m')
+        def translate_blocks_task(self, job_id: str, blocks: List[Block], target_lang: str) -> List[TranslatedBlock]
+      </signature>
+      <path>backend/app/tasks/translate_blocks.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest with mocked DeepL responses. Test batch processing logic.
+      Integration tests with real API (rate-limited). Track cost in tests.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_translation.py</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-2.3.1">
+        <test>Test DeepL client initializes with API key</test>
+        <test>Test basic translation EN→JA works</test>
+        <test>Test translation EN→VI works</test>
+      </idea>
+      <idea acId="AC-2.3.2">
+        <test>Test batch_translate groups blocks correctly</test>
+        <test>Test batch size of 10 is used</test>
+        <test>Test handles partial batches</test>
+      </idea>
+      <idea acId="AC-2.3.3">
+        <test>Test parallel page processing</test>
+        <test>Test cost tracking</test>
+      </idea>
+      <idea acId="AC-2.3.4">
+        <test>Test rate limit handling with backoff</test>
+        <test>Test retry on transient errors</test>
+        <test>Test graceful failure handling</test>
+      </idea>
+      <idea acId="AC-2.3.5">
+        <test>Test Celery task integration</test>
+        <test>Test translated blocks stored in DB</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

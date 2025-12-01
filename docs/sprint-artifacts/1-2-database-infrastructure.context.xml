@@ -1,0 +1,330 @@
+<story-context id="1-2-database-infrastructure" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.2</storyId>
+    <title>Database & Infrastructure Setup</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-2-database-infrastructure.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Backend Developer</asA>
+    <iWant>Set up persistent data storage with PostgreSQL, caching layer with Redis, file storage with S3, and database migration framework with Alembic</iWant>
+    <soThat>The application has reliable data persistence and all services are configured and tested locally via Docker Compose</soThat>
+    
+    <tasks>
+      <task id="1" title="Create PostgreSQL Schema" estimate="2h">
+        <subtask>Connect to PostgreSQL from backend</subtask>
+        <subtask>Create Users table (id, google_id, email, name, created_at)</subtask>
+        <subtask>Create Translations table (id, user_id, status, original_path, translated_path)</subtask>
+        <subtask>Create DocumentBlocks table (id, translation_id, page_num, block_num, original_text, translated_text, coordinates)</subtask>
+        <subtask>Create Glossary table (id, user_id, term, translation, target_lang)</subtask>
+        <subtask>Add indexes on frequently queried columns</subtask>
+        <subtask>Add foreign key constraints</subtask>
+      </task>
+      
+      <task id="2" title="Configure Redis Connection" estimate="1h">
+        <subtask>Install redis-py and aioredis</subtask>
+        <subtask>Create Redis connection pool in config</subtask>
+        <subtask>Add health check endpoint</subtask>
+        <subtask>Test connection with simple get/set</subtask>
+      </task>
+      
+      <task id="3" title="Set Up S3 Integration" estimate="1.5h">
+        <subtask>Create MinIO (local S3) bucket for development</subtask>
+        <subtask>Create AWS S3 bucket for production</subtask>
+        <subtask>Configure IAM policy (GetObject, PutObject, DeleteObject)</subtask>
+        <subtask>Update boto3 client with proper configuration</subtask>
+        <subtask>Create utility functions: upload_file, download_file, delete_file</subtask>
+      </task>
+      
+      <task id="4" title="Initialize Alembic" estimate="1.5h">
+        <subtask>Run alembic init migrations</subtask>
+        <subtask>Update alembic.ini with DATABASE_URL</subtask>
+        <subtask>Create initial migration from SQLAlchemy models</subtask>
+        <subtask>Test migration: upgrade and downgrade</subtask>
+        <subtask>Document migration workflow</subtask>
+      </task>
+      
+      <task id="5" title="Update Environment Configuration" estimate="0.5h">
+        <subtask>Add DATABASE_URL to backend/.env</subtask>
+        <subtask>Add REDIS_URL to backend/.env</subtask>
+        <subtask>Add AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY</subtask>
+        <subtask>Add AWS_REGION, AWS_BUCKET_NAME</subtask>
+        <subtask>Add S3_ENDPOINT_URL for local development</subtask>
+        <subtask>Update .env.example with all variables</subtask>
+      </task>
+      
+      <task id="6" title="Write Integration Tests" estimate="1.5h">
+        <subtask>Test database connection</subtask>
+        <subtask>Test schema creation</subtask>
+        <subtask>Test Redis connection</subtask>
+        <subtask>Test S3 bucket access</subtask>
+        <subtask>Test migration rollback</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-1.2.1" title="PostgreSQL Schema Created">
+      <requirement>Users table with Google OAuth integration</requirement>
+      <requirement>Translations table with job status tracking</requirement>
+      <requirement>DocumentBlocks table for extracted text blocks</requirement>
+      <requirement>All tables with proper indexes and constraints</requirement>
+      <requirement>Foreign keys properly configured</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.2.2" title="Redis Cache Layer Ready">
+      <requirement>Redis service running in Docker Compose</requirement>
+      <requirement>Redis connection pooling configured</requirement>
+      <requirement>Session caching configured</requirement>
+      <requirement>Celery broker configured to use Redis</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.2.3" title="S3 Bucket Setup">
+      <requirement>Local S3 (MinIO) configured for dev</requirement>
+      <requirement>AWS S3 bucket created for production</requirement>
+      <requirement>IAM policy configured (least privilege)</requirement>
+      <requirement>boto3 client properly configured</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.2.4" title="Alembic Migrations">
+      <requirement>Alembic initialized in backend</requirement>
+      <requirement>Initial migration created for schema</requirement>
+      <requirement>Migration runs successfully: alembic upgrade head</requirement>
+      <requirement>Rollback works: alembic downgrade -1</requirement>
+    </criterion>
+    
+    <criterion id="AC-1.2.5" title="Environment Variables">
+      <requirement>DATABASE_URL configured</requirement>
+      <requirement>REDIS_URL configured</requirement>
+      <requirement>AWS_REGION, AWS_BUCKET_NAME configured</requirement>
+      <requirement>All secrets in .env (not committed)</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 3.4 - Database Schema</section>
+        <snippet>PostgreSQL schema definitions for users, translations, and tenant_settings tables with proper indexes and constraints.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 5.1 - Local Development (Docker Compose)</section>
+        <snippet>Docker Compose configuration with postgres, redis, and backend services. Database connection strings and service dependencies.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 3.2 - Backend Project Structure</section>
+        <snippet>Backend folder structure including models/, migrations/, services/ directories for database and infrastructure code.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epic-1-tech-stack.md</path>
+        <title>Epic 1 Tech Stack</title>
+        <section>Database & Cache Technologies</section>
+        <snippet>PostgreSQL 15, Redis 7, SQLAlchemy 2.0+, Alembic 1.12+, boto3 1.29+ for S3 integration.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Non-Functional Requirements - Scalability</section>
+        <snippet>Multi-tenant architecture with PostgreSQL for metadata, S3 for temporary file storage with 24-hour TTL auto-cleanup.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/main.py</path>
+        <kind>application</kind>
+        <symbol>FastAPI app</symbol>
+        <reason>Main application entry point where database and Redis connections will be initialized</reason>
+      </file>
+      <file>
+        <path>backend/pyproject.toml</path>
+        <kind>config</kind>
+        <symbol>dependencies</symbol>
+        <reason>Already includes sqlalchemy, alembic, psycopg2-binary, redis, aioredis, boto3</reason>
+      </file>
+      <file>
+        <path>docker-compose.yml</path>
+        <kind>infrastructure</kind>
+        <symbol>services</symbol>
+        <reason>Contains postgres and redis service definitions that need to be verified/updated</reason>
+      </file>
+      <file>
+        <path>backend/Dockerfile</path>
+        <kind>infrastructure</kind>
+        <symbol>container</symbol>
+        <reason>Backend container definition, may need updates for migrations</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="sqlalchemy" version="2.0.23">ORM for database operations</package>
+        <package name="alembic" version="1.12.1">Database migration framework</package>
+        <package name="psycopg2-binary" version="2.9.9">PostgreSQL adapter</package>
+        <package name="redis" version="5.0.1">Redis client</package>
+        <package name="aioredis" version="2.0.1">Async Redis client</package>
+        <package name="boto3" version="1.29.7">AWS S3 SDK</package>
+      </python>
+      <infrastructure>
+        <service name="PostgreSQL" version="15">Primary database</service>
+        <service name="Redis" version="7-alpine">Cache and Celery broker</service>
+        <service name="MinIO" version="latest">Local S3-compatible storage</service>
+      </infrastructure>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="pattern">Use SQLAlchemy ORM for all database operations (no raw SQL)</constraint>
+    <constraint type="pattern">All database operations must be async-safe using SQLAlchemy async session</constraint>
+    <constraint type="pattern">Use connection pooling for both PostgreSQL and Redis</constraint>
+    <constraint type="pattern">Store tenant_id on all tables for multi-tenant isolation</constraint>
+    <constraint type="pattern">Use UUID for all primary keys</constraint>
+    <constraint type="pattern">Use uv for Python package management</constraint>
+    <constraint type="security">Never commit .env files with secrets</constraint>
+    <constraint type="security">S3 IAM policy must follow least privilege principle</constraint>
+    <constraint type="testing">All infrastructure connections must have integration tests</constraint>
+    <constraint type="testing">Migrations must be tested for both upgrade and downgrade</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Database Session</name>
+      <kind>dependency injection</kind>
+      <signature>async def get_db() -> AsyncGenerator[AsyncSession, None]</signature>
+      <path>backend/app/database.py</path>
+    </interface>
+    <interface>
+      <name>Redis Client</name>
+      <kind>dependency injection</kind>
+      <signature>async def get_redis() -> Redis</signature>
+      <path>backend/app/cache.py</path>
+    </interface>
+    <interface>
+      <name>S3 Client</name>
+      <kind>utility functions</kind>
+      <signature>
+        async def upload_file(file: UploadFile, bucket: str, key: str) -> str
+        async def download_file(bucket: str, key: str) -> bytes
+        async def delete_file(bucket: str, key: str) -> bool
+        def get_presigned_url(bucket: str, key: str, expires: int = 3600) -> str
+      </signature>
+      <path>backend/app/s3.py</path>
+    </interface>
+    <interface>
+      <name>User Model</name>
+      <kind>SQLAlchemy model</kind>
+      <signature>
+        class User(Base):
+            id: UUID (primary key)
+            tenant_id: UUID (not null)
+            google_id: str (unique, not null)
+            email: str (unique, not null)
+            name: str
+            subscription_tier: Enum (free, pro, enterprise)
+            usage_this_month: int (default 0)
+            created_at: datetime
+            updated_at: datetime
+      </signature>
+      <path>backend/app/models/user.py</path>
+    </interface>
+    <interface>
+      <name>Translation Model</name>
+      <kind>SQLAlchemy model</kind>
+      <signature>
+        class Translation(Base):
+            id: UUID (primary key)
+            tenant_id: UUID (foreign key)
+            user_id: UUID (foreign key)
+            file_name: str
+            file_size_mb: int
+            source_language: str
+            target_language: str
+            status: Enum (queued, processing, complete, error)
+            progress_percent: int
+            original_file_path: str
+            result_file_path: str (nullable)
+            tone_applied: str
+            error_message: str (nullable)
+            created_at: datetime
+            updated_at: datetime
+            expires_at: datetime
+      </signature>
+      <path>backend/app/models/translation.py</path>
+    </interface>
+    <interface>
+      <name>DocumentBlock Model</name>
+      <kind>SQLAlchemy model</kind>
+      <signature>
+        class DocumentBlock(Base):
+            id: UUID (primary key)
+            translation_id: UUID (foreign key)
+            page_num: int
+            block_num: int
+            original_text: str
+            translated_text: str
+            coordinates: JSON (bbox)
+            created_at: datetime
+      </signature>
+      <path>backend/app/models/document_block.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest for all tests. Integration tests should use actual database and Redis containers via Docker Compose. 
+      Use pytest-asyncio for async test functions. Mock external services (S3) in unit tests, use MinIO for integration tests.
+      Follow AAA pattern (Arrange, Act, Assert). Test files should mirror source structure in tests/ directory.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_database.py</location>
+      <location>backend/tests/test_cache.py</location>
+      <location>backend/tests/test_s3.py</location>
+      <location>backend/tests/test_migrations.py</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-1.2.1">
+        <test>Test database connection with valid credentials</test>
+        <test>Test Users table CRUD operations</test>
+        <test>Test Translations table CRUD operations</test>
+        <test>Test DocumentBlocks table CRUD operations</test>
+        <test>Test foreign key constraints prevent orphan records</test>
+        <test>Test indexes exist on tenant_id, user_id, status columns</test>
+      </idea>
+      <idea acId="AC-1.2.2">
+        <test>Test Redis connection with valid credentials</test>
+        <test>Test Redis get/set operations</test>
+        <test>Test Redis connection pool handles multiple concurrent requests</test>
+        <test>Test Celery can connect to Redis broker</test>
+      </idea>
+      <idea acId="AC-1.2.3">
+        <test>Test MinIO bucket creation and access</test>
+        <test>Test upload_file function uploads file to S3</test>
+        <test>Test download_file function retrieves file from S3</test>
+        <test>Test delete_file function removes file from S3</test>
+        <test>Test presigned URL generation and validity</test>
+      </idea>
+      <idea acId="AC-1.2.4">
+        <test>Test alembic upgrade head creates all tables</test>
+        <test>Test alembic downgrade -1 removes last migration</test>
+        <test>Test migration is idempotent (running twice doesn't error)</test>
+      </idea>
+      <idea acId="AC-1.2.5">
+        <test>Test application starts with all required env vars</test>
+        <test>Test application fails gracefully with missing env vars</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

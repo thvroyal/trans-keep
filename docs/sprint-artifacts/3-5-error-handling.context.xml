@@ -1,0 +1,255 @@
+<story-context id="3-5-error-handling" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.5</storyId>
+    <title>Error Handling & Edge Cases</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-5-error-handling.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>See helpful error messages and have the app recover gracefully from failures</iWant>
+    <soThat>I can complete my translation even when things go wrong</soThat>
+    
+    <tasks>
+      <task id="1" title="Implement Network Retry Logic" estimate="1h">
+        <subtask>Create retry utility with backoff</subtask>
+        <subtask>Retry upload on network error</subtask>
+        <subtask>Retry translation on timeout</subtask>
+        <subtask>Show retry indicator</subtask>
+        <subtask>Give up after 3 attempts</subtask>
+      </task>
+      
+      <task id="2" title="Handle Large Files" estimate="1.5h">
+        <subtask>Implement chunked upload</subtask>
+        <subtask>Resume incomplete uploads</subtask>
+        <subtask>Calculate progress accurately</subtask>
+        <subtask>Show upload speed</subtask>
+        <subtask>Test with 100MB PDF</subtask>
+      </task>
+      
+      <task id="3" title="Add Scanned PDF Detection" estimate="1h">
+        <subtask>Analyze PDF for text content</subtask>
+        <subtask>Set threshold (e.g., &gt;50% scanned)</subtask>
+        <subtask>Show warning to user</subtask>
+        <subtask>Suggest documentation</subtask>
+        <subtask>Don't block workflow</subtask>
+      </task>
+      
+      <task id="4" title="Implement API Fallbacks" estimate="1.5h">
+        <subtask>Catch DeepL API errors</subtask>
+        <subtask>Fallback to Google Translate API</subtask>
+        <subtask>Catch Claude API errors</subtask>
+        <subtask>Skip tone customization gracefully</subtask>
+        <subtask>Log all API failures</subtask>
+      </task>
+      
+      <task id="5" title="Create Error Messages" estimate="1h">
+        <subtask>Design clear error copy</subtask>
+        <subtask>Provide actionable guidance</subtask>
+        <subtask>Add support contact</subtask>
+        <subtask>Categorize errors (network, API, user)</subtask>
+        <subtask>Test with real users</subtask>
+      </task>
+      
+      <task id="6" title="End-to-End Testing" estimate="1.5h">
+        <subtask>Simulate network failures</subtask>
+        <subtask>Test large file edge cases</subtask>
+        <subtask>Test scanned PDF detection</subtask>
+        <subtask>Test API fallbacks</subtask>
+        <subtask>User acceptance testing</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-3.5.1" title="Network Error Recovery">
+      <requirement>Handle network timeouts</requirement>
+      <requirement>Implement retry with exponential backoff</requirement>
+      <requirement>Show helpful error messages</requirement>
+      <requirement>Resume interrupted uploads</requirement>
+      <requirement>Connection status indicator</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.5.2" title="Large File Handling">
+      <requirement>100MB PDF uploads reliably</requirement>
+      <requirement>Chunked upload for large files</requirement>
+      <requirement>Resume after interruption</requirement>
+      <requirement>Progress indicator accurate</requirement>
+      <requirement>Memory efficient</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.5.3" title="Scanned PDF Detection">
+      <requirement>Detect PDFs without embedded text</requirement>
+      <requirement>Warn user clearly</requirement>
+      <requirement>Suggest alternatives</requirement>
+      <requirement>Plan for OCR (Phase 2)</requirement>
+      <requirement>Don't break workflow</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.5.4" title="API Failure Fallback">
+      <requirement>DeepL API unavailable → fallback to Google Translate</requirement>
+      <requirement>Claude API unavailable → skip tone customization</requirement>
+      <requirement>Show degraded mode message</requirement>
+      <requirement>Never completely break functionality</requirement>
+      <requirement>Log all failures</requirement>
+    </criterion>
+    
+    <criterion id="AC-3.5.5" title="User Experience">
+      <requirement>Clear, helpful error messages</requirement>
+      <requirement>Actionable next steps</requirement>
+      <requirement>Error recovery obvious</requirement>
+      <requirement>No silent failures</requirement>
+      <requirement>Support contact info visible</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>NFR: Reliability & Error Handling</section>
+        <snippet>Graceful degradation, retry logic, user-friendly errors, no silent failures.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Section 7.4 - Error States</section>
+        <snippet>Error message design, retry buttons, fallback indicators, support links.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/services/translation_service.py</path>
+        <kind>service</kind>
+        <symbol>TranslationService</symbol>
+        <reason>Translation service - add fallback logic</reason>
+      </file>
+      <file>
+        <path>backend/app/services/pdf_service.py</path>
+        <kind>service</kind>
+        <symbol>PDFService</symbol>
+        <reason>PDF service - add scanned detection</reason>
+      </file>
+      <file>
+        <path>frontend/src/components/FileDropZone.tsx</path>
+        <kind>component</kind>
+        <symbol>FileDropZone</symbol>
+        <reason>File drop zone - add chunked upload and retry</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="tenacity" version="8.2.3">Retry logic with exponential backoff</package>
+        <package name="google-cloud-translate" version="3.14.0">Google Translate fallback</package>
+      </python>
+      <npm>
+        <package name="axios-retry" version="^3.9.1">Axios retry plugin</package>
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="reliability">Max 3 retry attempts before giving up</constraint>
+    <constraint type="reliability">Exponential backoff: 1s, 2s, 4s</constraint>
+    <constraint type="reliability">Never completely break - always show something useful</constraint>
+    <constraint type="ux">Error messages must be actionable</constraint>
+    <constraint type="ux">Show degraded mode indicator when using fallbacks</constraint>
+    <constraint type="logging">Log all errors with full context for debugging</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Retry Utility</name>
+      <kind>utility</kind>
+      <signature>
+        async function withRetry&lt;T&gt;(
+          fn: () => Promise&lt;T&gt;,
+          options: {
+            maxAttempts: number
+            backoffMs: number
+            onRetry?: (attempt: number, error: Error) => void
+          }
+        ): Promise&lt;T&gt;
+      </signature>
+      <path>frontend/src/utils/retry.ts</path>
+    </interface>
+    <interface>
+      <name>Error Boundary Component</name>
+      <kind>React component</kind>
+      <signature>
+        interface ErrorBoundaryProps {
+          fallback: React.ReactNode
+          onError?: (error: Error, errorInfo: ErrorInfo) => void
+          children: React.ReactNode
+        }
+      </signature>
+      <path>frontend/src/components/ErrorBoundary.tsx</path>
+    </interface>
+    <interface>
+      <name>Translation Service Fallback</name>
+      <kind>service</kind>
+      <signature>
+        class TranslationServiceWithFallback:
+            primary: TranslationService  # DeepL
+            fallback: GoogleTranslateService
+            
+            async def translate(text: str, source: str, target: str) -> TranslationResult:
+                try:
+                    return await self.primary.translate(...)
+                except DeepLError:
+                    log.warning("DeepL failed, using fallback")
+                    return await self.fallback.translate(...)
+      </signature>
+      <path>backend/app/services/translation_fallback.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest with simulated failures. Test retry logic with mock timers.
+      Test fallback behavior. User acceptance testing for error messages.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_error_handling.py</location>
+      <location>frontend/src/utils/__tests__/retry.test.ts</location>
+      <location>frontend/src/components/__tests__/ErrorBoundary.test.tsx</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-3.5.1">
+        <test>Test retry on network timeout</test>
+        <test>Test exponential backoff timing</test>
+        <test>Test gives up after 3 attempts</test>
+      </idea>
+      <idea acId="AC-3.5.2">
+        <test>Test 100MB file uploads successfully</test>
+        <test>Test upload resumes after interruption</test>
+        <test>Test progress indicator accuracy</test>
+      </idea>
+      <idea acId="AC-3.5.3">
+        <test>Test scanned PDF detected correctly</test>
+        <test>Test warning shown to user</test>
+        <test>Test workflow continues</test>
+      </idea>
+      <idea acId="AC-3.5.4">
+        <test>Test DeepL failure triggers Google fallback</test>
+        <test>Test Claude failure skips tone gracefully</test>
+        <test>Test degraded mode message shown</test>
+      </idea>
+      <idea acId="AC-3.5.5">
+        <test>Test error messages are clear</test>
+        <test>Test retry button works</test>
+        <test>Test support link visible</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+

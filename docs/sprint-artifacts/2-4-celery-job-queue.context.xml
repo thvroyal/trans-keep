@@ -1,0 +1,256 @@
+<story-context id="2-4-celery-job-queue" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.4</storyId>
+    <title>Celery Job Queue Setup</title>
+    <status>backlog</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-4-celery-job-queue.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>System</asA>
+    <iWant>Orchestrate the translation pipeline using Celery task queues</iWant>
+    <soThat>Long-running PDF processing doesn't block the API and can be monitored and retried</soThat>
+    
+    <tasks>
+      <task id="1" title="Set Up Celery" estimate="1.5h">
+        <subtask>Install celery and redis packages</subtask>
+        <subtask>Create celery_app.py configuration</subtask>
+        <subtask>Configure Redis broker</subtask>
+        <subtask>Initialize worker in docker-compose</subtask>
+        <subtask>Verify worker connects successfully</subtask>
+      </task>
+      
+      <task id="2" title="Create Task Pipeline" estimate="2h">
+        <subtask>Define extract task</subtask>
+        <subtask>Define translate task</subtask>
+        <subtask>Define tone_customize task</subtask>
+        <subtask>Define reconstruct task</subtask>
+        <subtask>Create orchestration chain</subtask>
+      </task>
+      
+      <task id="3" title="Implement Error Handling" estimate="1.5h">
+        <subtask>Add retry logic to tasks</subtask>
+        <subtask>Handle task timeouts</subtask>
+        <subtask>Log failures with context</subtask>
+        <subtask>Implement dead letter queue</subtask>
+        <subtask>Test failure scenarios</subtask>
+      </task>
+      
+      <task id="4" title="Add Status Tracking" estimate="1.5h">
+        <subtask>Store task status in database</subtask>
+        <subtask>Update status at each step</subtask>
+        <subtask>Expose status via API</subtask>
+        <subtask>Track progress percentage</subtask>
+        <subtask>Calculate ETA</subtask>
+      </task>
+      
+      <task id="5" title="Set Up Monitoring" estimate="1h">
+        <subtask>Install Celery Flower</subtask>
+        <subtask>Expose Flower at localhost:5555</subtask>
+        <subtask>Add task logging</subtask>
+        <subtask>Integrate with Otel tracing</subtask>
+        <subtask>Monitor resource usage</subtask>
+      </task>
+      
+      <task id="6" title="Integration Testing" estimate="1.5h">
+        <subtask>Test full pipeline with real PDF</subtask>
+        <subtask>Test failure recovery</subtask>
+        <subtask>Test timeout handling</subtask>
+        <subtask>Verify status updates</subtask>
+        <subtask>Load test with multiple jobs</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-2.4.1" title="Celery Configuration">
+      <requirement>Celery initialized with Redis broker</requirement>
+      <requirement>Worker process running in docker-compose</requirement>
+      <requirement>Task registry populated</requirement>
+      <requirement>Celery Beat scheduler working</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.4.2" title="Task Orchestration">
+      <requirement>extract_and_translate task defined</requirement>
+      <requirement>Task chain: extract → translate → tone → reconstruct</requirement>
+      <requirement>Error handling in task chains</requirement>
+      <requirement>Retry logic on failure</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.4.3" title="Monitoring">
+      <requirement>Task status tracked in database</requirement>
+      <requirement>Job progress visible in API</requirement>
+      <requirement>Failed tasks logged</requirement>
+      <requirement>Celery logs in Jaeger</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.4.4" title="Integration">
+      <requirement>Triggered on file upload</requirement>
+      <requirement>Status updates flow to frontend</requirement>
+      <requirement>Long-running tasks don't block API</requirement>
+      <requirement>Graceful timeout handling</requirement>
+    </criterion>
+    
+    <criterion id="AC-2.4.5" title="Production Ready">
+      <requirement>Celery Flower (monitoring UI) available</requirement>
+      <requirement>Worker health checks</requirement>
+      <requirement>Automatic retry on worker failure</requirement>
+      <requirement>Task timeouts configured</requirement>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 4.4 - Async Processing with Celery</section>
+        <snippet>Celery with Redis broker, task chains, status tracking, Flower monitoring.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>System Architecture Document</title>
+        <section>Section 8.2 - Background Job Processing</section>
+        <snippet>Task pipeline: upload → extract → translate → tone → reconstruct → notify.</snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <file>
+        <path>backend/app/tasks/extract_pdf.py</path>
+        <kind>task</kind>
+        <symbol>extract_pdf_task</symbol>
+        <reason>Extraction task from Story 2.2 - first step in pipeline</reason>
+      </file>
+      <file>
+        <path>backend/app/tasks/translate_blocks.py</path>
+        <kind>task</kind>
+        <symbol>translate_blocks_task</symbol>
+        <reason>Translation task from Story 2.3 - second step in pipeline</reason>
+      </file>
+      <file>
+        <path>docker-compose.yml</path>
+        <kind>infrastructure</kind>
+        <symbol>services</symbol>
+        <reason>Add Celery worker and Flower services</reason>
+      </file>
+    </code>
+    
+    <dependencies>
+      <python>
+        <package name="celery" version="5.3.4">Distributed task queue</package>
+        <package name="flower" version="2.0.1">Celery monitoring UI</package>
+        <package name="redis" version="5.0.1">Redis broker client</package>
+        <package name="opentelemetry-instrumentation-celery" version="0.42b0">Celery Otel instrumentation</package>
+      </python>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Use Redis as Celery broker (same instance as cache)</constraint>
+    <constraint type="architecture">Task chains must be idempotent (safe to retry)</constraint>
+    <constraint type="timeout">Extraction task: 5 minute timeout</constraint>
+    <constraint type="timeout">Translation task: 10 minute timeout</constraint>
+    <constraint type="timeout">Reconstruction task: 5 minute timeout</constraint>
+    <constraint type="retry">Max 3 retries with exponential backoff</constraint>
+    <constraint type="monitoring">All tasks must emit Otel traces</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Celery App Configuration</name>
+      <kind>configuration</kind>
+      <signature>
+        from celery import Celery
+        
+        celery_app = Celery(
+            'transkeep',
+            broker='redis://localhost:6379/0',
+            backend='redis://localhost:6379/1',
+            include=['app.tasks.extract_pdf', 'app.tasks.translate_blocks', 'app.tasks.reconstruct_pdf']
+        )
+        
+        celery_app.conf.update(
+            task_serializer='json',
+            result_serializer='json',
+            accept_content=['json'],
+            timezone='UTC',
+            enable_utc=True,
+            task_track_started=True,
+            task_time_limit=600,  # 10 minutes
+            task_soft_time_limit=540,  # 9 minutes
+        )
+      </signature>
+      <path>backend/app/celery_app.py</path>
+    </interface>
+    <interface>
+      <name>Translation Pipeline Task</name>
+      <kind>Celery task</kind>
+      <signature>
+        @celery_app.task(bind=True)
+        def process_translation_job(self, job_id: str) -> dict:
+            """
+            Orchestrates the full translation pipeline:
+            1. Download PDF from S3
+            2. Extract text blocks
+            3. Translate blocks
+            4. Apply tone customization
+            5. Reconstruct PDF
+            6. Upload to S3
+            7. Update job status
+            """
+            chain = (
+                extract_pdf_task.s(job_id) |
+                translate_blocks_task.s() |
+                customize_tone_task.s() |
+                reconstruct_pdf_task.s()
+            )
+            return chain.apply_async()
+      </signature>
+      <path>backend/app/tasks/pipeline.py</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use pytest-celery for task testing. Mock Redis with fakeredis.
+      Test task chains with eager mode. Integration tests with real workers.
+    </standards>
+    
+    <locations>
+      <location>backend/tests/test_celery.py</location>
+      <location>backend/tests/test_pipeline.py</location>
+    </locations>
+    
+    <ideas>
+      <idea acId="AC-2.4.1">
+        <test>Test Celery app initializes correctly</test>
+        <test>Test worker connects to Redis</test>
+        <test>Test tasks are registered</test>
+      </idea>
+      <idea acId="AC-2.4.2">
+        <test>Test task chain executes in order</test>
+        <test>Test error in chain stops execution</test>
+        <test>Test retry logic works</test>
+      </idea>
+      <idea acId="AC-2.4.3">
+        <test>Test status updates during pipeline</test>
+        <test>Test failed tasks are logged</test>
+        <test>Test Otel traces are emitted</test>
+      </idea>
+      <idea acId="AC-2.4.4">
+        <test>Test pipeline triggered on upload</test>
+        <test>Test API not blocked during processing</test>
+      </idea>
+      <idea acId="AC-2.4.5">
+        <test>Test Flower UI accessible</test>
+        <test>Test worker health check</test>
+        <test>Test task timeout handling</test>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>
+
