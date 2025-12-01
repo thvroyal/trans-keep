@@ -60,7 +60,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd backend
-        uv pip install --system-site-packages -e ".[dev]"
+        uv pip install --system -e ".[dev]"
 
     - name: Run linting with ruff
       run: |

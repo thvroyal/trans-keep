@@ -1,2 +1,1 @@
-"""Backend tests"""
-
+"""Tests for TransKeep backend"""

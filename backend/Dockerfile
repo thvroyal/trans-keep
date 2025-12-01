@@ -16,7 +16,7 @@ WORKDIR /app
 COPY pyproject.toml requirements.txt* ./
 
 # Install dependencies with uv (use system Python)
-RUN uv pip install --system-site-packages -r requirements.txt 2>/dev/null || uv pip install --system-site-packages -e .
+RUN uv pip install --system -r requirements.txt 2>/dev/null || uv pip install --system -e .
 
 # Copy application code
 COPY app/ ./app/

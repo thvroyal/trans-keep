@@ -144,7 +144,7 @@ COPY pyproject.toml .
 COPY backend/ .
 
 # Install dependencies with uv (faster in Docker)
-RUN uv pip install --system-site-packages -e .
+RUN uv pip install --break-system-packages -e .
 
 # Run FastAPI
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
@@ -304,7 +304,7 @@ uv pip install --force-reinstall fastapi  # Reinstall specific package
 ```dockerfile
 # Make sure you're using locked requirements
 COPY requirements.txt .
-RUN uv pip install --system-site-packages -r requirements.txt
+RUN uv pip install --break-system-packages -r requirements.txt
 ```
 
 ---
