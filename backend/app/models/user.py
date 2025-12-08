@@ -68,7 +68,7 @@ class User(Base):
 
     # Subscription and usage
     subscription_tier: Mapped[SubscriptionTier] = mapped_column(
-        Enum(SubscriptionTier),
+        Enum(SubscriptionTier, values_callable=lambda x: [e.value for e in x]),
         default=SubscriptionTier.FREE,
         nullable=False,
     )

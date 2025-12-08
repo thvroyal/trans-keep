@@ -46,8 +46,13 @@ class Settings(BaseSettings):
         case_sensitive = False
 
 
-@lru_cache
+@lru_cache()
 def get_settings() -> Settings:
-    """Get cached settings instance"""
+    """Get cached settings instance
+    
+    Note: This uses lru_cache to create a singleton, but the Settings
+    instance is created fresh on first call (at runtime), not at import time.
+    This ensures environment variables are properly loaded from .env files.
+    """
     return Settings()
 

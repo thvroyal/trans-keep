@@ -19,20 +19,20 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create subscription_tier enum
+    # Create subscription_tier enum (checkfirst prevents errors if already exists)
     subscription_tier_enum = postgresql.ENUM(
         "free", "pro", "enterprise",
         name="subscriptiontier",
-        create_type=True,
+        create_type=False,  # We create explicitly below with checkfirst
     )
     subscription_tier_enum.create(op.get_bind(), checkfirst=True)
 
-    # Create translation_status enum
+    # Create translation_status enum (checkfirst prevents errors if already exists)
     translation_status_enum = postgresql.ENUM(
         "pending", "extracting", "translating", "applying_tone",
         "reconstructing", "completed", "failed",
         name="translationstatus",
-        create_type=True,
+        create_type=False,  # We create explicitly below with checkfirst
     )
     translation_status_enum.create(op.get_bind(), checkfirst=True)
 
@@ -47,7 +47,7 @@ def upgrade() -> None:
         sa.Column("picture_url", sa.String(500), nullable=True),
         sa.Column(
             "subscription_tier",
-            postgresql.ENUM("free", "pro", "enterprise", name="subscriptiontier"),
+            postgresql.ENUM("free", "pro", "enterprise", name="subscriptiontier", create_type=False),
             nullable=False,
             server_default="free",
         ),
@@ -90,6 +90,7 @@ def upgrade() -> None:
                 "pending", "extracting", "translating", "applying_tone",
                 "reconstructing", "completed", "failed",
                 name="translationstatus",
+                create_type=False,
             ),
             nullable=False,
             server_default="pending",

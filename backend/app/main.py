@@ -11,9 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.cache import close_redis, get_redis
 from app.config import get_settings
 from app.database import close_db, get_db
+from app.routers.auth import router as auth_router
 from app.s3 import create_bucket_if_not_exists
-
-settings = get_settings()
 
 
 @asynccontextmanager
@@ -21,6 +20,7 @@ async def lifespan(app: FastAPI):
     """Application lifespan handler for startup and shutdown events"""
     # Startup
     # Create S3 bucket if it doesn't exist (for local MinIO)
+    settings = get_settings()
     if settings.s3_endpoint_url:
         try:
             await create_bucket_if_not_exists()
@@ -51,6 +51,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(auth_router)
+
 
 @app.get("/")
 async def root():
@@ -59,7 +62,7 @@ async def root():
 
 
 @app.get("/health")
-async def health():
+async def health(settings = Depends(get_settings)):
     """Basic health check"""
     return {
         "status": "healthy",
@@ -72,6 +75,7 @@ async def health():
 async def health_detailed(
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis),
+    settings = Depends(get_settings),
 ):
     """
     Detailed health check including database and Redis connectivity.

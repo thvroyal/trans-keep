@@ -85,7 +85,7 @@ class Translation(Base):
 
     # Status and progress
     status: Mapped[TranslationStatus] = mapped_column(
-        Enum(TranslationStatus),
+        Enum(TranslationStatus, values_callable=lambda x: [e.value for e in x]),
         default=TranslationStatus.PENDING,
         nullable=False,
         index=True,

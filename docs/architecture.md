@@ -12,7 +12,7 @@
 **Architecture Philosophy:** Simple, proven, scalable. Use battle-tested tech stacks with minimal custom code. Get to MVP fast, then optimize.
 
 **Tech Stack:**
-- **Frontend:** React 18 + TypeScript + shadcn/ui + Tailwind CSS (Vite bundler)
+- **Frontend:** React 18 + TypeScript + Tailwind CSS v4 + ESLint + Prettier (Vite bundler)
 - **Backend:** FastAPI + Python 3.11 + PostgreSQL + Redis + Celery
 - **Infrastructure:** AWS (S3, ECS, RDS, ElastiCache, CloudFront)
 - **External APIs:** DeepL (translation), Claude 3.5 Haiku (tone), LlamaParse (OCR), Google OAuth
@@ -144,11 +144,11 @@
 |-------|------------|-----|
 | **Framework** | React 18 + TypeScript | Industry standard, great ecosystem, type safety |
 | **Bundler** | Vite | Fast, modern, HMR for development |
-| **UI Components** | shadcn/ui | Figma aesthetic, accessible, customizable |
-| **Styling** | Tailwind CSS | Utility-first, modern, efficient |
+| **Styling** | Tailwind CSS v4 | Utility-first, modern, efficient, Vite plugin integration |
+| **Code Quality** | ESLint + Prettier | Consistent code style, catch errors early |
 | **State** | Zustand | Lightweight, simple alternative to Redux |
 | **Data Fetching** | TanStack Query | Caching, deduplication, polling (critical for status) |
-| **Package Manager** | pnpm | Fast, space-efficient, strict dependency management |
+| **Package Manager** | npm | Standard, reliable dependency management |
 | **Router** | React Router v6 | Standard for SPA routing |
 | **PDF Rendering** | pdf.js | Lightweight, browser-native PDF viewer |
 | **Auth** | Google OAuth (via FastAPI) | Simple, secure, no password management |
@@ -159,40 +159,60 @@
 frontend/
 ├─ src/
 │  ├─ components/
+│  │  ├─ SignIn.tsx (Google OAuth sign-in button)
 │  │  ├─ ReviewPanel.tsx (hero component - dual PDF viewer)
 │  │  ├─ ToneSelector.tsx (tone presets + custom input)
 │  │  ├─ EditPanel.tsx (inline text editor)
-│  │  ├─ ProgressIndicator.tsx (step-by-step progress)
-│  │  └─ [shadcn/ui imports]
+│  │  └─ ProgressIndicator.tsx (step-by-step progress)
 │  ├─ pages/
+│  │  ├─ AuthCallback.tsx (OAuth callback handler)
 │  │  ├─ Upload.tsx
 │  │  ├─ Processing.tsx
 │  │  ├─ Review.tsx (HERO PAGE)
 │  │  └─ NotFound.tsx
 │  ├─ hooks/
-│  │  ├─ useAuth.ts (Google OAuth state)
+│  │  ├─ useAuth.ts (Google OAuth state, token management)
 │  │  ├─ useUpload.ts (file upload logic)
 │  │  ├─ useTranslation.ts (polling status)
 │  │  └─ usePDFViewer.ts (PDF rendering)
 │  ├─ services/
-│  │  └─ api.ts (axios client, endpoints)
+│  │  └─ api.ts (fetch client, endpoints)
 │  ├─ stores/
 │  │  └─ appStore.ts (Zustand: user, currentJob, settings)
-│  ├─ styles/
-│  │  ├─ globals.css (Tailwind imports)
-│  │  └─ index.css
-│  ├─ App.tsx (Router setup)
+│  ├─ index.css (Tailwind CSS v4 import: @import "tailwindcss")
+│  ├─ App.tsx (Router setup, auth flow)
 │  └─ main.tsx (Entry point)
 ├─ public/
 │  └─ index.html
-├─ tailwind.config.ts (Tailwind + TransKeep colors)
-├─ vite.config.ts (Vite bundler config)
+├─ .eslintrc.cjs (ESLint configuration)
+├─ .prettierrc (Prettier configuration)
+├─ vite.config.ts (Vite + Tailwind CSS v4 plugin)
 ├─ tsconfig.json
 ├─ package.json
 └─ .env.local (API_URL=http://localhost:8000)
 ```
 
-### 2.3 Key Frontend Components
+### 2.3 Frontend Development Setup
+
+**Tailwind CSS v4 Configuration:**
+- Uses `@tailwindcss/vite` plugin for seamless Vite integration
+- Single CSS import: `@import "tailwindcss"` in `src/index.css`
+- No PostCSS configuration required
+- No `tailwind.config.ts` needed (uses CSS-first configuration)
+- All styling via utility classes (no native CSS files)
+
+**Code Quality Tools:**
+- **ESLint**: TypeScript + React linting with recommended rules
+- **Prettier**: Code formatting with ESLint integration
+- **Scripts**: `npm run lint`, `npm run lint:fix`, `npm run format`, `npm run format:check`
+
+**Styling Approach:**
+- Utility-first CSS with Tailwind CSS v4
+- No component-level CSS files
+- Consistent design system via Tailwind utilities
+- Responsive design using Tailwind breakpoints
+
+### 2.4 Key Frontend Components
 
 **ReviewPanel (Hero Component):**
 - Dual PDF viewers using pdf.js
@@ -211,56 +231,58 @@ useQuery({
 })
 ```
 
-**Authentication Flow (using better-auth):**
+**Authentication Flow (Google OAuth + JWT):**
 
 **Installation:**
 ```bash
-# Backend
-pip install better-auth
+# Backend (dependencies already in pyproject.toml)
+# google-auth, python-jose, httpx
 
 # Frontend
-npm install @better-auth/react
+# No additional auth library needed - custom implementation
 ```
 
 **Backend Setup:**
 ```python
-# backend/app/config.py
-from better_auth import BetterAuth
-from better_auth.adapters.sqlalchemy import SQLAlchemyAdapter
-from better_auth.google import Google
-
-auth = BetterAuth(
-    adapter=SQLAlchemyAdapter(db),
-    providers=[
-        Google(
-            client_id=GOOGLE_CLIENT_ID,
-            client_secret=GOOGLE_CLIENT_SECRET,
-        )
-    ],
-    secret=AUTH_SECRET,  # For JWT signing
-)
-
 # backend/app/routers/auth.py
-@router.post("/auth/sign-in/google")
-async def sign_in_google(code: str):
-    # better-auth handles the OAuth code exchange
-    session = await auth.sign_in_with_code(code, "google")
-    return {"access_token": session.token, "user": session.user}
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from jose import jwt
+
+@router.get("/api/v1/auth/google")
+async def initiate_google_oauth():
+    # Returns Google OAuth URL for frontend redirect
+    
+@router.post("/api/v1/auth/google/callback")
+async def google_oauth_callback(callback: GoogleOAuthCallback):
+    # Exchanges OAuth code for ID token
+    # Verifies ID token with Google
+    # Creates/updates user in database
+    # Returns JWT access token
+
+@router.get("/api/v1/auth/me")
+async def get_current_user_info(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    # Returns current user info from JWT token
 ```
 
 **Frontend Flow:**
-- User clicks "Sign in with Google"
-- better-auth opens Google consent screen
-- Google redirects to callback with auth code
-- Frontend exchanges code for JWT token
-- better-auth stores token in httpOnly cookie (secure)
-- All API requests automatically include Authorization header
+- User clicks "Sign in with Google" button
+- Frontend calls `/api/v1/auth/google` to get OAuth URL
+- Browser redirects to Google consent screen
+- Google redirects to `/auth/callback` with auth code
+- Frontend exchanges code via `/api/v1/auth/google/callback`
+- Backend returns JWT token
+- Frontend stores token in localStorage (httpOnly cookie enhancement possible)
+- All API requests include `Authorization: Bearer <token>` header
+- Token expiration detected and handled gracefully
 
-**Why better-auth over NextAuth:**
-- Lighter weight (works with any backend, not just Next.js)
-- Easier to integrate with FastAPI
-- Simpler API for OAuth flows
-- Better framework agnostic
+**Implementation Details:**
+- Custom `useAuth` hook manages authentication state
+- Token persistence across page reloads
+- Automatic token expiration detection (5-minute threshold)
+- Graceful handling of expired/invalid tokens
 
 ### 2.4 State Management (Zustand)
 
@@ -1199,9 +1221,9 @@ trace_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
 **Frontend:**
 ```bash
 npm create vite@latest -- --template react-ts
-npm install react-router-dom @tanstack/react-query zustand axios
-npm install -D tailwindcss postcss autoprefixer
-npm install shadcn-ui@latest init -d
+npm install react-router-dom @tanstack/react-query zustand
+npm install -D @tailwindcss/vite tailwindcss@next
+npm install -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-react eslint-plugin-react-hooks prettier eslint-config-prettier eslint-plugin-prettier
 npm install pdfjs-dist
 ```
 

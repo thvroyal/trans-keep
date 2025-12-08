@@ -1,0 +1,197 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  
+  --color-highlight-hover: var(--highlight-hover);
+  --color-highlight-selected: var(--highlight-selected);
+  --color-highlight-border: var(--highlight-border);
+  
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+:root {
+  --radius: 0.5rem;
+  
+  /* TransKeep Color Palette - Light Mode */
+  --background: #FAFAFA;
+  --foreground: #0A0A0A;
+  --card: #FFFFFF;
+  --card-foreground: #0A0A0A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0A0A0A;
+  
+  /* Primary - Confident Blue */
+  --primary: #0066FF;
+  --primary-foreground: #FFFFFF;
+  
+  /* Secondary */
+  --secondary: #F4F4F5;
+  --secondary-foreground: #0A0A0A;
+  
+  /* Muted */
+  --muted: #F4F4F5;
+  --muted-foreground: #71717A;
+  
+  /* Accent */
+  --accent: #F0F7FF;
+  --accent-foreground: #0066FF;
+  
+  /* Destructive */
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  
+  /* Borders */
+  --border: #E4E4E7;
+  --input: #E4E4E7;
+  --ring: #0066FF;
+  
+  /* Semantic Colors */
+  --success: #10B981;
+  --success-light: #D1FAE5;
+  --warning: #F59E0B;
+  --warning-light: #FEF3C7;
+  
+  /* Highlight Colors (The Star Feature) */
+  --highlight-hover: #DBEAFE;
+  --highlight-selected: #BFDBFE;
+  --highlight-border: #3B82F6;
+}
+
+.dark {
+  --background: #0A0A0A;
+  --foreground: #FAFAFA;
+  --card: #18181B;
+  --card-foreground: #FAFAFA;
+  --popover: #18181B;
+  --popover-foreground: #FAFAFA;
+  
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
+  
+  --secondary: #27272A;
+  --secondary-foreground: #FAFAFA;
+  
+  --muted: #27272A;
+  --muted-foreground: #A1A1AA;
+  
+  --accent: #1E3A5F;
+  --accent-foreground: #60A5FA;
+  
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  
+  --border: #27272A;
+  --input: #27272A;
+  --ring: #3B82F6;
+  
+  --highlight-hover: #1E3A5F;
+  --highlight-selected: #1E40AF;
+  --highlight-border: #60A5FA;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    line-height: 1.6;
+  }
+  
+  h1, .text-h1 {
+    @apply text-3xl font-bold leading-tight;
+  }
+  
+  h2, .text-h2 {
+    @apply text-2xl font-semibold leading-snug;
+  }
+  
+  h3, .text-h3 {
+    @apply text-xl font-semibold leading-snug;
+  }
+  
+  h4, .text-h4 {
+    @apply text-base font-semibold leading-normal;
+  }
+  
+  .text-body {
+    @apply text-base font-normal leading-relaxed;
+  }
+  
+  .text-body-sm {
+    @apply text-sm font-normal leading-normal;
+  }
+  
+  .text-caption {
+    @apply text-xs font-medium leading-tight;
+  }
+}
+
+@layer utilities {
+  .transition-fast {
+    transition-duration: 100ms;
+  }
+  
+  .transition-normal {
+    transition-duration: 150ms;
+  }
+  
+  .transition-slow {
+    transition-duration: 250ms;
+  }
+  
+  .ease-out-custom {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .shadow-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-elevated {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-floating {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+}
