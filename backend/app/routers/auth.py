@@ -4,6 +4,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from urllib.parse import urlencode
+from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -262,7 +263,7 @@ async def get_current_user_info(
             )
 
         # Get user from database
-        result = await db.execute(select(User).where(User.id == user_id))
+        result = await db.execute(select(User).where(User.id == UUID(user_id)))
         user = result.scalar_one_or_none()
 
         if not user:
