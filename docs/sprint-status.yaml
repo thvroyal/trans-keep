@@ -53,7 +53,7 @@ development_status:
   epic-2: contexted
   2-1-file-upload-endpoint: review
   2-2-pdf-extraction: review
-  2-3-deepl-translation: ready-for-dev
+  2-3-deepl-translation: review
   2-4-celery-job-queue: ready-for-dev
   2-5-status-polling: ready-for-dev
   epic-2-retrospective: optional
@@ -89,14 +89,14 @@ progress:
   # Story status breakdown
   stories_backlog: 0
   stories_drafted: 0
-  stories_ready_for_dev: 14
+  stories_ready_for_dev: 13
   stories_in_progress: 0
-  stories_review: 3
+  stories_review: 4
   stories_done: 3
   
   # Progress metrics
   completion_rate: 15%  # 3 of 20 done
-  review_rate: 15%  # 3 of 20 in review
+  review_rate: 20%  # 4 of 20 in review
   contexted_rate: 100%  # All 20 have context files
   sprint_readiness: 100%  # All stories ready for development
 
@@ -224,21 +224,22 @@ notes: |
   ⏳ Story 1.3 (Google OAuth Integration) is IN REVIEW
   ⏳ Story 2.1 (File Upload Endpoint) is IN REVIEW
   ⏳ Story 2.2 (PDF Extraction) is IN REVIEW
+  ⏳ Story 2.3 (DeepL Translation) is IN REVIEW
 
   📊 Sprint Progress:
     - 3 stories complete (15%)
-    - 3 stories in review (15%)
-    - 14 stories ready-for-dev (70%)
+    - 4 stories in review (20%)
+    - 13 stories ready-for-dev (65%)
     - Zero blockers identified
-    - Velocity: ~2 stories per day (Week 1: 3 stories done, 3 in review)
-    - On track for ~5 stories per week
+    - Velocity: ~3 stories per day (Week 1: 3 done + 4 in review = 7 stories worked)
+    - Excellent momentum! Epic 2 core pipeline complete through translation
 
   🚀 Next Priority: 
-    1. Complete reviews for 1.3, 2.1, 2.2
-    2. Continue Epic 2 stories - 2.3 (DeepL Translation)
-    3. Epic 2 Week 2 stories ready
-    4. Strong momentum on core translation pipeline
+    1. Complete reviews for 1.3, 2.1, 2.2, 2.3
+    2. Continue Epic 2 - Story 2.4 (Celery Job Queue) will wire up extraction & translation
+    3. Core translation pipeline (upload → extract → translate) ready!
+    4. Outstanding velocity on critical path features
 
 ---
 Last Updated: 2025-12-09
-Status: 🟢 STORY 2.2 COMPLETE & IN REVIEW - 3 DONE, 3 REVIEW, 14 READY
+Status: 🟢 STORY 2.3 COMPLETE & IN REVIEW - 3 DONE, 4 REVIEW, 13 READY - CORE PIPELINE READY!

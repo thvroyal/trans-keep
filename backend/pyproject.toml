@@ -25,6 +25,7 @@ dependencies = [
     "google-auth==2.25.2",
     "anthropic==0.7.8",
     "deepl==1.16.0",
+    "tenacity==8.2.3",
     "opentelemetry-api==1.21.0",
     "opentelemetry-sdk==1.21.0",
     "opentelemetry-exporter-jaeger==1.21.0",
