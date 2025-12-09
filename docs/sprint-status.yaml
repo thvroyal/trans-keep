@@ -52,7 +52,7 @@ development_status:
   # EPIC 2: Core Translation Pipeline 🔄
   epic-2: contexted
   2-1-file-upload-endpoint: review
-  2-2-pdf-extraction: ready-for-dev
+  2-2-pdf-extraction: review
   2-3-deepl-translation: ready-for-dev
   2-4-celery-job-queue: ready-for-dev
   2-5-status-polling: ready-for-dev
@@ -89,14 +89,14 @@ progress:
   # Story status breakdown
   stories_backlog: 0
   stories_drafted: 0
-  stories_ready_for_dev: 15
+  stories_ready_for_dev: 14
   stories_in_progress: 0
-  stories_review: 2
+  stories_review: 3
   stories_done: 3
   
   # Progress metrics
   completion_rate: 15%  # 3 of 20 done
-  review_rate: 5%  # 1 of 20 in review
+  review_rate: 15%  # 3 of 20 in review
   contexted_rate: 100%  # All 20 have context files
   sprint_readiness: 100%  # All stories ready for development
 
@@ -223,21 +223,22 @@ notes: |
 
   ⏳ Story 1.3 (Google OAuth Integration) is IN REVIEW
   ⏳ Story 2.1 (File Upload Endpoint) is IN REVIEW
+  ⏳ Story 2.2 (PDF Extraction) is IN REVIEW
 
   📊 Sprint Progress:
     - 3 stories complete (15%)
-    - 2 stories in review (10%)
-    - 16 stories ready-for-dev (80%)
+    - 3 stories in review (15%)
+    - 14 stories ready-for-dev (70%)
     - Zero blockers identified
-    - Velocity: ~1.5 stories per day (Week 1: 3 stories done in ~11 hours)
+    - Velocity: ~2 stories per day (Week 1: 3 stories done, 3 in review)
     - On track for ~5 stories per week
 
   🚀 Next Priority: 
-    1. Complete 1.3 (OAuth) review
-    2. Complete 2.1 (File Upload) review
-    3. Continue Epic 2 stories - 2.2 (PDF Extraction)
-    4. Epic 2 Week 2 stories ready
+    1. Complete reviews for 1.3, 2.1, 2.2
+    2. Continue Epic 2 stories - 2.3 (DeepL Translation)
+    3. Epic 2 Week 2 stories ready
+    4. Strong momentum on core translation pipeline
 
 ---
 Last Updated: 2025-12-09
-Status: 🟢 STORY 2.1 COMPLETE & IN REVIEW - 3 DONE, 2 REVIEW, 15 READY
+Status: 🟢 STORY 2.2 COMPLETE & IN REVIEW - 3 DONE, 3 REVIEW, 14 READY
