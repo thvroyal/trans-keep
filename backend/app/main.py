@@ -13,23 +13,36 @@ from app.config import get_settings
 from app.database import close_db, get_db
 from app.routers.auth import router as auth_router
 from app.s3 import create_bucket_if_not_exists
+from app.otel_config import init_telemetry, instrument_app
+from app.logger import info, error
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler for startup and shutdown events"""
     # Startup
+    info("TransKeep backend starting up")
+    
+    # Initialize OpenTelemetry
+    try:
+        init_telemetry("transkeep-backend")
+        info("OpenTelemetry initialized successfully")
+    except Exception as e:
+        error("Failed to initialize OpenTelemetry", exc=e)
+    
     # Create S3 bucket if it doesn't exist (for local MinIO)
     settings = get_settings()
     if settings.s3_endpoint_url:
         try:
             await create_bucket_if_not_exists()
+            info("S3 bucket ready")
         except Exception as e:
-            print(f"Warning: Could not create S3 bucket: {e}")
+            error("Could not create S3 bucket", exc=e)
 
     yield
 
     # Shutdown
+    info("TransKeep backend shutting down")
     await close_db()
     await close_redis()
 
@@ -42,7 +55,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Configure CORS for local development
+# Configure CORS for local development (add before instrumentation)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:5173"],
@@ -50,6 +63,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Instrument FastAPI and libraries with OpenTelemetry
+try:
+    instrument_app(app)
+except Exception as e:
+    error("Failed to instrument FastAPI app", exc=e)
 
 # Include routers
 app.include_router(auth_router)

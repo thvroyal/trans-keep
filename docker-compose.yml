@@ -137,13 +137,16 @@ services:
     image: jaegertracing/all-in-one:latest
     container_name: transkeep-jaeger
     ports:
-      - "6831:6831/udp"  # Jaeger agent UDP
-      - "16686:16686"    # Jaeger UI
+      - "6831:6831/udp"  # Jaeger agent UDP (for backend)
+      - "16686:16686"    # Jaeger UI (http://localhost:16686)
       - "14268:14268"    # Jaeger collector HTTP
+      - "4317:4317"      # OTLP gRPC receiver
+      - "4318:4318"      # OTLP HTTP receiver (for frontend)
     networks:
       - transkeep-network
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+      - OTEL_ENABLED=true
 
   # MinIO - S3-compatible object storage for local development
   minio:
