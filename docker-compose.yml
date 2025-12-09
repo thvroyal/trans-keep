@@ -115,14 +115,21 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: transkeep-celery
-    command: celery -A app.celery_app worker -l info
+    command: celery -A app.celery_app worker -l info --concurrency=2
     env_file:
       - ./backend/.env
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/transkeep
       - REDIS_URL=redis://redis:6379
+      - DEEPL_API_KEY=${DEEPL_API_KEY:-placeholder}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY:-placeholder}
       - OTEL_EXPORTER_JAEGER_AGENT_HOST=jaeger
       - OTEL_EXPORTER_JAEGER_AGENT_PORT=6831
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - AWS_REGION=us-east-1
+      - AWS_BUCKET_NAME=transkeep-files
+      - S3_ENDPOINT_URL=http://minio:9000
     volumes:
       - ./backend/app:/app/app
     networks:
@@ -131,6 +138,32 @@ services:
       - redis
       - postgres
       - jaeger
+      - minio
+    healthcheck:
+      test: ["CMD", "celery", "-A", "app.celery_app", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Flower - Task Monitoring UI
+  flower:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: transkeep-flower
+    command: celery -A app.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/transkeep
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - transkeep-network
+    depends_on:
+      - redis
+      - celery_worker
 
   # Jaeger - Distributed Tracing & Observability
   jaeger:

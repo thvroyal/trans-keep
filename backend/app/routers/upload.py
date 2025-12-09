@@ -13,6 +13,7 @@ from app.models.user import User
 from app.s3 import S3Keys, upload_file
 from app.schemas.upload import UploadResponse
 from app.logger import info, error as log_error
+from app.tasks.orchestrator import trigger_translation_pipeline
 
 router = APIRouter(prefix="/api/v1", tags=["upload"])
 
@@ -210,6 +211,19 @@ async def upload_document(
             user_id=str(current_user.id),
             status=translation.status.value,
         )
+        
+        # Trigger Celery pipeline to process the translation
+        try:
+            task_id = trigger_translation_pipeline(str(job_id))
+            info(
+                "Translation pipeline triggered",
+                job_id=str(job_id),
+                task_id=task_id,
+            )
+        except Exception as e:
+            log_error("Failed to trigger translation pipeline", exc=e, job_id=str(job_id))
+            # Don't fail the upload if pipeline trigger fails
+            # User can retry or admin can manually trigger
         
     except Exception as e:
         log_error("Database record creation failed", exc=e, job_id=str(job_id))

@@ -7,6 +7,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.celery_app import celery_app
 from app.cache import get_redis_client
 from app.database import get_db
 from app.logger import error as log_error, info
@@ -15,23 +16,38 @@ from app.s3 import download_file
 from app.services.pdf_service import PDFService
 
 
-# Note: Celery app will be configured in Story 2.4
-# For now, this is a stub that shows the task structure
+@celery_app.task(
+    name="extract_pdf",
+    bind=True,
+    max_retries=3,
+    default_retry_delay=30,  # 30 seconds delay between retries
+    time_limit=600,  # 10 minutes max
+)
+def extract_pdf_task(self, job_id: str) -> dict:
+    """
+    Celery task to extract text from uploaded PDF.
+    
+    Args:
+        job_id: Translation job ID
+        
+    Returns:
+        dict with extraction results
+    """
+    import asyncio
+    
+    try:
+        return asyncio.run(_extract_pdf_async(job_id))
+    except Exception as e:
+        log_error("Extract PDF task failed", exc=e, job_id=job_id)
+        raise self.retry(exc=e)
 
-# @celery_app.task(bind=True, max_retries=3)
-# async def extract_pdf_task(self, job_id: str) -> dict:
-#     """
-#     Celery task to extract text from uploaded PDF.
-#     
-#     This task will be activated once Celery is configured in Story 2.4.
-#     
-#     Args:
-#         job_id: Translation job ID
-#         
-#     Returns:
-#         dict with extraction results
-#     """
-#     return await extract_pdf_sync(job_id)
+
+async def _extract_pdf_async(job_id: str) -> dict:
+    """Async wrapper for extraction"""
+    from app.database import get_async_session
+    
+    async with get_async_session() as db:
+        return await extract_pdf_sync(job_id, db)
 
 
 async def extract_pdf_sync(

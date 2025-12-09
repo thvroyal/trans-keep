@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.celery_app import celery_app
 from app.cache import Cache, CacheKeys, get_redis_client
 from app.database import get_db
 from app.logger import error as log_error, info
@@ -14,23 +15,39 @@ from app.services.pdf_service import PDFService
 from app.services.translation_service import TranslationService
 
 
-# Note: Celery app will be configured in Story 2.4
-# For now, this is a stub that shows the task structure
+@celery_app.task(
+    name="translate_blocks",
+    bind=True,
+    max_retries=3,
+    default_retry_delay=60,  # 1 minute delay between retries
+    time_limit=900,  # 15 minutes max
+    rate_limit='10/m',  # Max 10 translations per minute (DeepL rate limit)
+)
+def translate_blocks_task(self, job_id: str) -> dict:
+    """
+    Celery task to translate extracted text blocks.
+    
+    Args:
+        job_id: Translation job ID
+        
+    Returns:
+        dict with translation results
+    """
+    import asyncio
+    
+    try:
+        return asyncio.run(_translate_blocks_async(job_id))
+    except Exception as e:
+        log_error("Translate blocks task failed", exc=e, job_id=job_id)
+        raise self.retry(exc=e)
 
-# @celery_app.task(bind=True, max_retries=3, rate_limit='10/m')
-# async def translate_blocks_task(self, job_id: str) -> dict:
-#     """
-#     Celery task to translate extracted text blocks.
-#     
-#     This task will be activated once Celery is configured in Story 2.4.
-#     
-#     Args:
-#         job_id: Translation job ID
-#         
-#     Returns:
-#         dict with translation results
-#     """
-#     return await translate_blocks_sync(job_id)
+
+async def _translate_blocks_async(job_id: str) -> dict:
+    """Async wrapper for translation"""
+    from app.database import get_async_session
+    
+    async with get_async_session() as db:
+        return await translate_blocks_sync(job_id, db)
 
 
 async def translate_blocks_sync(

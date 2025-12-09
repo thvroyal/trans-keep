@@ -65,6 +65,18 @@ async def init_db() -> None:
         await conn.run_sync(Base.metadata.create_all)
 
 
+async def get_async_session():
+    """
+    Get an async database session (context manager for use outside FastAPI).
+    
+    Usage:
+        async with get_async_session() as db:
+            result = await db.execute(query)
+            await db.commit()
+    """
+    return async_session_maker()
+
+
 async def close_db() -> None:
     """Close database connections"""
     await engine.dispose()
