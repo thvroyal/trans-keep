@@ -74,7 +74,7 @@ async def get_translation_status(
         )
     
     # Get cached progress data from Redis
-    redis = await get_redis_client()
+    redis = get_redis_client()
     cache = Cache(redis)
     progress_key = CacheKeys.job_progress(job_id)
     progress_data = await cache.get_json(progress_key)
@@ -102,6 +102,11 @@ async def get_translation_status(
         progress_percent,
     )
     
+    # Calculate total cost (translation + tone)
+    total_cost = None
+    if translation.translation_cost is not None or translation.tone_cost is not None:
+        total_cost = (translation.translation_cost or 0) + (translation.tone_cost or 0)
+    
     # Build response
     response = StatusResponse(
         job_id=str(translation.id),
@@ -117,7 +122,7 @@ async def get_translation_status(
         eta_seconds=eta_seconds,
         source_language=translation.source_language,
         target_language=translation.target_language,
-        estimated_cost_usd=float(translation.cost_usd) if translation.cost_usd else None,
+        estimated_cost_usd=total_cost,
         error_message=translation.error_message,
     )
     

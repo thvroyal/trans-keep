@@ -35,7 +35,7 @@ async def get_redis() -> AsyncGenerator[Redis, None]:
         await client.aclose()
 
 
-async def get_redis_client() -> Redis:
+def get_redis_client() -> Redis:
     """Get a Redis client (non-generator version for internal use)"""
     return Redis(connection_pool=redis_pool)
 

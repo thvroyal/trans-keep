@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from uuid import UUID
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from google.auth.transport import requests
 from google.oauth2 import id_token
@@ -109,6 +109,7 @@ async def get_or_create_user(
 
 @router.get("/google")
 async def initiate_google_oauth(
+    request: Request,
     settings: Settings = Depends(get_settings),
 ):
     """
@@ -125,10 +126,17 @@ async def initiate_google_oauth(
     # Generate state for CSRF protection
     state = secrets.token_urlsafe(32)
 
+    # Get frontend origin from request or use referer
+    frontend_origin = request.headers.get("origin") or request.headers.get("referer", "http://localhost:5173")
+    if frontend_origin.endswith("/"):
+        frontend_origin = frontend_origin[:-1]
+    
+    redirect_uri = f"{frontend_origin}/auth/callback"
+
     # Build Google OAuth URL
     params = {
         "client_id": settings.google_client_id,
-        "redirect_uri": "http://localhost:5173/auth/callback",  # Frontend callback (Vite dev server)
+        "redirect_uri": redirect_uri,
         "response_type": "code",
         "scope": "openid email profile",
         "state": state,
@@ -142,6 +150,7 @@ async def initiate_google_oauth(
 
 @router.post("/google/callback")
 async def google_oauth_callback(
+    request: Request,
     callback: GoogleOAuthCallback,
     db: AsyncSession = Depends(get_db),
     settings: Settings = Depends(get_settings),
@@ -159,6 +168,13 @@ async def google_oauth_callback(
         )
 
     try:
+        # Get frontend origin from request or use referer
+        frontend_origin = request.headers.get("origin") or request.headers.get("referer", "http://localhost:5173")
+        if frontend_origin.endswith("/"):
+            frontend_origin = frontend_origin[:-1]
+        
+        redirect_uri = f"{frontend_origin}/auth/callback"
+        
         # Exchange authorization code for tokens
         async with httpx.AsyncClient() as client:
             token_response = await client.post(
@@ -167,7 +183,7 @@ async def google_oauth_callback(
                     "code": callback.code,
                     "client_id": settings.google_client_id,
                     "client_secret": settings.google_client_secret,
-                    "redirect_uri": "http://localhost:5173/auth/callback",
+                    "redirect_uri": redirect_uri,
                     "grant_type": "authorization_code",
                 },
             )

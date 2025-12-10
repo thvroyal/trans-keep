@@ -31,12 +31,12 @@ export function ProcessingPage() {
   const { data: status, error, isLoading } = useQuery<StatusResponse>({
     queryKey: ['translationStatus', jobId],
     queryFn: async () => {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        throw new Error('Not authenticated');
-      }
+       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+       const token = localStorage.getItem('access_token');
+       
+       if (!token) {
+         throw new Error('Not authenticated');
+       }
 
       const response = await fetch(`${apiUrl}/api/v1/status/${jobId}`, {
         headers: {

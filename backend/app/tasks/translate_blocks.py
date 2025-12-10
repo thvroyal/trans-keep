@@ -89,7 +89,7 @@ async def translate_blocks_sync(
         await db.commit()
         
         # Get Redis client for loading cached blocks
-        redis = await get_redis_client()
+        redis = get_redis_client()
         cache = Cache(redis)
         
         try:

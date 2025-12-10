@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<context>
+  <story_key>2-6-pdf-reconstruction</story_key>
+  <story_title>PDF Reconstruction & S3 Upload</story_title>
+  <epic>2</epic>
+  <purpose>Complete the end-to-end translation pipeline by reconstructing PDFs with translated text and uploading to S3</purpose>
+
+  <!-- ARTIFACTS: References to relevant project documentation -->
+  <artifacts>
+    <doc type="tech-stack" path="docs/epic-2-tech-stack.md" sections="Story 2.6, Data Flow Architecture (line 202-217)">
+      Epic 2 tech stack defines PDF reconstruction requirements and data flow. Story 2.6 implements Step 5 of the pipeline.
+    </doc>
+    <doc type="architecture" path="docs/architecture.md" sections="Translation Pipeline, File Storage">
+      Architecture documentation covers S3 integration and pipeline flow.
+    </doc>
+    <doc type="change-proposal" path="docs/sprint-change-proposal-2025-12-11.md">
+      Sprint change proposal that triggered creation of this story. Documents rationale, impact, and implementation approach.
+    </doc>
+  </artifacts>
+
+  <!-- INTERFACES: Existing code interfaces this story must use/integrate with -->
+  <interfaces>
+    <interface type="celery-task" name="extract_pdf_sync" file="backend/app/tasks/extract_pdf.py">
+      Reference for async task patterns. Story 2.6 task should follow similar structure.
+      Key patterns: async function, database session, error handling, status updates.
+    </interface>
+    
+    <interface type="celery-task" name="translate_blocks_sync" file="backend/app/tasks/translate_blocks.py">
+      Reference for accessing Redis cache and handling translated blocks.
+      Key patterns: Cache().get_json(), block deserialization, error logging.
+    </interface>
+    
+    <interface type="orchestrator" name="process_translation_pipeline" file="backend/app/tasks/orchestrator.py">
+      Where reconstruction task will be integrated. Must be called as Step 3 after translation.
+      Current chain: extract_pdf_sync() → translate_blocks_sync() → [ADD reconstruct_pdf_sync() here]
+    </interface>
+    
+    <interface type="s3-service" name="S3Keys" file="backend/app/s3.py">
+      S3 helper for consistent key paths. Use S3Keys.result_path() to generate upload path.
+      Methods: upload_file(), download_file(), get_presigned_url().
+    </interface>
+    
+    <interface type="database" name="Translation model" file="backend/app/models/translation.py">
+      Must update: translated_pdf_path, completed_at, status.
+      Also read: id, user_id, file_name for S3 path construction.
+    </interface>
+    
+    <interface type="cache" name="CacheKeys" file="backend/app/cache.py">
+      To retrieve translated blocks from Redis. Key format: CacheKeys.blocks(job_id) + "_translated"
+    </interface>
+    
+    <interface type="router" name="GET /api/v1/download/{job_id}" file="backend/app/routers/translation.py">
+      Download endpoint that will serve reconstructed PDFs. Expects Translation.translated_pdf_path to be populated.
+    </interface>
+    
+    <interface type="pdf-library" name="PyMuPDF (fitz)" version="1.23+">
+      Already in use in Story 2.2. Reuse for text replacement with coordinate preservation.
+      Key usage: fitz.open(), page.insert_text(), doc.save().
+    </interface>
+  </interfaces>
+
+  <!-- DEPENDENCIES: What must be completed before this story -->
+  <dependencies>
+    <dependency type="story" key="2-1-file-upload-endpoint" status="completed">
+      Original files uploaded to S3. Story 2.6 reads from there.
+    </dependency>
+    
+    <dependency type="story" key="2-2-pdf-extraction" status="completed">
+      PDF extraction patterns established. Story 2.6 reuses PyMuPDF for reconstruction.
+    </dependency>
+    
+    <dependency type="story" key="2-3-deepl-translation" status="completed">
+      Translation produces blocks with translated_text. Story 2.6 uses these blocks.
+    </dependency>
+    
+    <dependency type="story" key="2-4-celery-job-queue" status="completed">
+      Celery infrastructure ready. Story 2.6 creates a new task in this framework.
+    </dependency>
+    
+    <dependency type="story" key="2-5-status-polling" status="completed">
+      Status tracking ready. Story 2.6 updates status to "completed" after reconstruction.
+    </dependency>
+    
+    <dependency type="infrastructure" name="Redis cache" status="running">
+      Translated blocks cached in Redis during translation. Story 2.6 reads from here.
+    </dependency>
+    
+    <dependency type="infrastructure" name="S3/MinIO" status="running">
+      S3 client configured. Story 2.6 uploads reconstructed PDFs.
+    </dependency>
+    
+    <dependency type="infrastructure" name="PostgreSQL" status="running">
+      Translation records stored. Story 2.6 updates translated_pdf_path.
+    </dependency>
+  </dependencies>
+
+  <!-- CONSTRAINTS: Technical or business constraints for implementation -->
+  <constraints>
+    <constraint type="performance">
+      Reconstruction must complete in <30 seconds for 100-page PDFs. Large PDFs may require streaming.
+    </constraint>
+    
+    <constraint type="data">
+      Translated blocks must be loaded from Redis cache (populated during Story 2.3). If cache missing, job fails.
+    </constraint>
+    
+    <constraint type="file-path">
+      S3 paths must use S3Keys.result_path() for consistency: results/{user_id}/{job_id}/{filename}
+    </constraint>
+    
+    <constraint type="error-handling">
+      Must handle S3 timeout gracefully. Retry 3 times before marking job failed.
+    </constraint>
+    
+    <constraint type="tone">
+      If tone customization was applied (Story 3.2 - future), use tone_customized_text over translated_text.
+      For now, use translated_text. Logic must be flexible for future tone integration.
+    </constraint>
+    
+    <constraint type="testing">
+      Must test with real PDFs: English→Japanese, English→Vietnamese, English→Chinese.
+      Various sizes: 1-page, 10-page, 100-page, 500-page documents.
+    </constraint>
+  </constraints>
+
+  <!-- TESTS: What tests should be written -->
+  <tests>
+    <test type="unit" name="test_reconstruct_text_preservation">
+      Verify PyMuPDF correctly replaces text while maintaining coordinates, fonts, styles.
+    </test>
+    
+    <test type="unit" name="test_tone_text_selection">
+      Verify that tone_customized_text is selected if available, otherwise fall back to translated_text.
+    </test>
+    
+    <test type="unit" name="test_large_pdf_handling">
+      Test reconstruction with 500+ page PDFs. Verify memory usage and processing time.
+    </test>
+    
+    <test type="integration" name="test_full_pipeline_extract_to_download">
+      Upload PDF → Extract → Translate → Reconstruct → Download. Verify end-to-end flow.
+    </test>
+    
+    <test type="integration" name="test_s3_upload_and_path_storage">
+      Verify reconstructed PDF uploaded to S3 at correct path and path stored in Translation.translated_pdf_path.
+    </test>
+    
+    <test type="integration" name="test_download_endpoint_with_reconstructed_pdf">
+      Verify /api/v1/download/{job_id} serves the reconstructed PDF correctly.
+    </test>
+    
+    <test type="error" name="test_s3_upload_timeout_and_retry">
+      Simulate S3 timeout, verify task retries 3 times before failing.
+    </test>
+    
+    <test type="error" name="test_missing_blocks_in_cache">
+      If blocks not found in Redis, job should fail gracefully with error message.
+    </test>
+    
+    <test type="error" name="test_malformed_pdf_handling">
+      If PDF corrupted or unreadable, job should fail without crashing.
+    </test>
+    
+    <test type="regression" name="test_no_regression_stories_2_1_to_2_5">
+      Run full test suite for upload, extraction, translation, job queue, status polling.
+      Verify no changes broke existing functionality.
+    </test>
+  </tests>
+
+  <!-- KEY DECISIONS: Technical decisions already made for this story -->
+  <key_decisions>
+    <decision type="library">
+      Use PyMuPDF (fitz) for PDF reconstruction (already in use for extraction in Story 2.2).
+      Alternative considered: ReportLab (too heavy for this use case).
+    </decision>
+    
+    <decision type="caching">
+      Load translated blocks from Redis cache populated during Story 2.3.
+      Alternative considered: Load from database (slower, already in cache).
+    </decision>
+    
+    <decision type="upload">
+      Upload reconstructed PDF to S3 using boto3 (already in use for original uploads).
+      Store path in Translation.translated_pdf_path for presigned URL generation.
+    </decision>
+    
+    <decision type="tone">
+      For now, prioritize tone_customized_text if available, else translated_text.
+      This prepares for future Story 3.2 (Tone Customization) integration without breaking changes.
+    </decision>
+  </key_decisions>
+
+  <!-- DATA FLOW: How data moves through this story -->
+  <data_flow>
+    <flow step="1" name="Load Original PDF">
+      Source: S3 path `uploads/{user_id}/{job_id}/{filename}` (stored in Translation.original_pdf_path)
+      Method: Download via S3 (or use cached local copy if still in memory)
+      Output: PDF bytes
+    </flow>
+    
+    <flow step="2" name="Load Translated Blocks">
+      Source: Redis cache key `{CacheKeys.blocks(job_id)}_translated`
+      Method: Cache.get_json()
+      Format: { blocks: [{original: {...}, translated_text: "...", ...}], total_cost: X }
+      Output: List of translated blocks
+    </flow>
+    
+    <flow step="3" name="Reconstruct PDF">
+      Method: Use PyMuPDF to replace text in original PDF using translated blocks
+      For each block:
+        - Get coordinates from original block
+        - Get text: tone_customized_text if exists, else translated_text
+        - Insert text at coordinates, preserving font/size/style
+      Output: Reconstructed PDF bytes
+    </flow>
+    
+    <flow step="4" name="Upload to S3">
+      Method: s3.upload_file() with boto3
+      Path: results/{user_id}/{job_id}/{filename}
+      Content-Type: application/pdf
+      Output: S3 key
+    </flow>
+    
+    <flow step="5" name="Update Database">
+      Update Translation record:
+        - translated_pdf_path = S3 key from step 4
+        - status = "completed"
+        - completed_at = now()
+      Output: Updated translation record
+    </flow>
+  </data_flow>
+
+  <!-- KNOWN ISSUES: Any known blockers or gotchas -->
+  <known_issues>
+    <issue severity="medium" title="PyMuPDF text replacement with special characters">
+      Some PDFs with special characters (Arabic, Thai, etc.) may not insert correctly.
+      Mitigation: Test with multilingual PDFs. May need font substitution logic.
+    </issue>
+    
+    <issue severity="medium" title="Large PDF memory usage">
+      500+ page PDFs may cause memory issues when loading entire PDF into memory.
+      Mitigation: Consider streaming approach or page-by-page reconstruction if issues arise.
+    </issue>
+    
+    <issue severity="low" title="Coordinate precision">
+      Original PDF coordinates may be in different units (points, pixels, etc.).
+      Mitigation: Use same coordinate system as extraction (Story 2.2). Already normalized.
+    </issue>
+  </known_issues>
+
+  <!-- REFERENCES: Links to external documentation -->
+  <references>
+    <reference type="library" name="PyMuPDF Documentation">
+      https://pymupdf.readthedocs.io/ - PDF manipulation guide
+    </reference>
+    
+    <reference type="library" name="boto3 S3 Reference">
+      https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html
+    </reference>
+    
+    <reference type="library" name="Celery Task Documentation">
+      https://docs.celeryproject.io/en/stable/userguide/tasks.html
+    </reference>
+  </references>
+
+</context>

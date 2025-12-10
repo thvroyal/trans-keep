@@ -11,7 +11,7 @@ from app.logger import error as log_error, info
 from app.middleware.auth_middleware import get_current_user
 from app.models.translation import Translation
 from app.models.user import User
-from app.s3 import S3Keys, generate_presigned_url
+from app.s3 import S3Keys, get_presigned_url
 from app.schemas.translation import TranslationDetailsResponse
 
 router = APIRouter(prefix="/api/v1", tags=["translation"])
@@ -75,7 +75,7 @@ async def get_translation_details(
         job_id=str(translation.id),
         filename=translation.file_name,
     )
-    original_pdf_url = await generate_presigned_url(original_s3_key, expiration=3600)
+    original_pdf_url = get_presigned_url(original_s3_key, expires_in=3600)
     
     # Translated PDF URL (only if translation is complete)
     translated_pdf_url = None
@@ -86,10 +86,15 @@ async def get_translation_details(
             filename=translation.file_name,
         )
         try:
-            translated_pdf_url = await generate_presigned_url(translated_s3_key, expiration=3600)
+            translated_pdf_url = get_presigned_url(translated_s3_key, expires_in=3600)
         except Exception as e:
             log_error("Failed to generate presigned URL for translated PDF", exc=e, job_id=job_id)
             # Don't fail the request if translated PDF isn't ready yet
+    
+    # Calculate total cost (translation + tone)
+    total_cost = None
+    if translation.translation_cost is not None or translation.tone_cost is not None:
+        total_cost = (translation.translation_cost or 0) + (translation.tone_cost or 0)
     
     # Build response
     response = TranslationDetailsResponse(
@@ -101,7 +106,7 @@ async def get_translation_details(
         source_language=translation.source_language,
         target_language=translation.target_language,
         page_count=None,  # TODO: Get from extraction metadata
-        cost_usd=float(translation.cost_usd) if translation.cost_usd else None,
+        cost_usd=total_cost,
         created_at=translation.created_at.isoformat(),
         completed_at=translation.completed_at.isoformat() if translation.completed_at else None,
     )
@@ -182,7 +187,7 @@ async def download_translated_pdf(
     )
     
     try:
-        download_url = await generate_presigned_url(translated_s3_key, expiration=3600)
+        download_url = get_presigned_url(translated_s3_key, expires_in=3600)
     except Exception as e:
         log_error("Failed to generate download URL", exc=e, job_id=job_id)
         raise HTTPException(

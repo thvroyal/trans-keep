@@ -3,8 +3,10 @@
 Chains together: upload → extract → translate → complete
 """
 
+import asyncio
 from uuid import UUID
 
+import nest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.celery_app import celery_app
@@ -12,7 +14,11 @@ from app.database import get_async_session
 from app.logger import error as log_error, info
 from app.models.translation import Translation, TranslationStatus
 from app.tasks.extract_pdf import extract_pdf_sync
+from app.tasks.reconstruct_pdf import reconstruct_pdf_sync
 from app.tasks.translate_blocks import translate_blocks_sync
+
+# Allow nested event loops in Celery worker processes
+nest_asyncio.apply()
 
 
 @celery_app.task(
@@ -28,7 +34,8 @@ def process_translation_pipeline(self, job_id: str) -> dict:
     This task coordinates the entire translation workflow:
     1. Extract text from PDF (with layout preservation)
     2. Translate extracted blocks using DeepL
-    3. Update job status and mark complete
+    3. Reconstruct PDF with translated text and upload to S3
+    4. Update job status and mark complete
     
     Note: This is a synchronous Celery task that calls async functions.
     We use asyncio.run() to bridge sync/async.
@@ -42,13 +49,11 @@ def process_translation_pipeline(self, job_id: str) -> dict:
     Raises:
         Exception: If any step fails (will trigger retry)
     """
-    import asyncio
-    
     try:
         info("Starting translation pipeline", job_id=job_id)
         
-        # Run the async pipeline
-        result = asyncio.run(_run_pipeline_async(job_id))
+        # Run the async pipeline (includes error handling)
+        result = asyncio.run(_run_pipeline_with_error_handling_async(job_id))
         
         info("Translation pipeline complete", job_id=job_id, result=result)
         return result
@@ -56,14 +61,33 @@ def process_translation_pipeline(self, job_id: str) -> dict:
     except Exception as e:
         log_error("Translation pipeline failed", exc=e, job_id=job_id)
         
-        # Update job status to failed
-        try:
-            asyncio.run(_mark_job_failed(job_id, str(e)))
-        except Exception:
-            pass  # Best effort
-        
         # Retry the task (if retries remaining)
         raise self.retry(exc=e)
+
+
+async def _run_pipeline_with_error_handling_async(job_id: str) -> dict:
+    """
+    Run the full translation pipeline with integrated error handling.
+    
+    This function wraps the pipeline execution and marks the job as failed
+    if any errors occur, all within a single event loop context.
+    
+    Args:
+        job_id: Translation job ID
+        
+    Returns:
+        dict with pipeline results
+        
+    Raises:
+        Exception: If pipeline fails (after marking job as failed)
+    """
+    try:
+        return await _run_pipeline_async(job_id)
+    except Exception as e:
+        # Mark the job as failed within the same event loop
+        await _mark_job_failed(job_id, str(e))
+        # Re-raise to trigger retry
+        raise
 
 
 async def _run_pipeline_async(job_id: str) -> dict:
@@ -92,12 +116,20 @@ async def _run_pipeline_async(job_id: str) -> dict:
         if not translation_result["success"]:
             raise Exception(f"Translation failed: {translation_result.get('error', 'Unknown error')}")
         
+        # Step 3: Reconstruct PDF with translations
+        info("Pipeline step 3: Reconstructing PDF", job_id=job_id)
+        reconstruction_result = await reconstruct_pdf_sync(job_id, db)
+        
+        if not reconstruction_result["success"]:
+            raise Exception(f"Reconstruction failed: {reconstruction_result.get('error', 'Unknown error')}")
+        
         # Pipeline complete
         info(
             "Pipeline complete",
             job_id=job_id,
             blocks_extracted=extraction_result.get("blocks", 0),
             blocks_translated=translation_result.get("translated_blocks", 0),
+            translated_pdf_uploaded=reconstruction_result.get("uploaded_key"),
             cost_usd=translation_result.get("cost_usd", 0),
         )
         
@@ -106,6 +138,7 @@ async def _run_pipeline_async(job_id: str) -> dict:
             "job_id": job_id,
             "extraction": extraction_result,
             "translation": translation_result,
+            "reconstruction": reconstruction_result,
         }
 
 

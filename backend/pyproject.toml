@@ -33,6 +33,7 @@ dependencies = [
     "opentelemetry-instrumentation-fastapi==0.42b0",
     "opentelemetry-instrumentation-sqlalchemy==0.42b0",
     "opentelemetry-instrumentation-requests==0.42b0",
+    "nest_asyncio==1.6.0",
 ]
 
 [project.optional-dependencies]

@@ -65,7 +65,7 @@ async def init_db() -> None:
         await conn.run_sync(Base.metadata.create_all)
 
 
-async def get_async_session():
+def get_async_session():
     """
     Get an async database session (context manager for use outside FastAPI).
     

@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import Layout from '@/components/Layout'
 import UploadPage from '@/pages/UploadPage'
-import ProcessingPage from '@/pages/ProcessingPage'
+import { ProcessingPage } from '@/pages/ProcessingPage'
 import ReviewPage from '@/pages/ReviewPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import AuthCallback from '@/pages/AuthCallback'
@@ -55,13 +55,8 @@ export const router = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-        element: <PublicRoute />,
-        children: [
-          {
-            index: true,
-            element: <UploadPage />,
-          },
-        ],
+        index: true,
+        element: <UploadPage />,
       },
       {
         element: <ProtectedRoute />,

@@ -90,7 +90,7 @@ async def extract_pdf_sync(
         await db.commit()
         
         # Get Redis client for caching
-        redis = await get_redis_client()
+        redis = get_redis_client()
         
         try:
             # Download PDF from S3 to temp file
