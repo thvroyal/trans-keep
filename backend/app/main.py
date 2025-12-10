@@ -13,6 +13,8 @@ from app.config import get_settings
 from app.database import close_db, get_db
 from app.routers.auth import router as auth_router
 from app.routers.upload import router as upload_router
+from app.routers.status import router as status_router
+from app.routers.translation import router as translation_router
 from app.s3 import create_bucket_if_not_exists
 from app.otel_config import init_telemetry, instrument_app
 from app.logger import info, error
@@ -74,6 +76,8 @@ except Exception as e:
 # Include routers
 app.include_router(auth_router)
 app.include_router(upload_router)
+app.include_router(status_router)
+app.include_router(translation_router)
 
 
 @app.get("/")

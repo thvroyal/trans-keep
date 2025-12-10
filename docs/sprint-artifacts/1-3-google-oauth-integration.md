@@ -207,8 +207,9 @@ Implement Google OAuth 2.0 authentication using better-auth library on both back
 
 ## Status
 
-**Current:** review  
-**Last Updated:** 2025-12-01  
+**Current:** in-progress  
+**Last Updated:** 2025-12-10  
+**Review Outcome:** Changes Requested (3 medium-severity issues to address)  
 
 ---
 
@@ -217,4 +218,163 @@ Implement Google OAuth 2.0 authentication using better-auth library on both back
 - **Story Context File:** docs/sprint-artifacts/1-3-google-oauth-integration.context.xml
 - **Architecture Reference:** docs/architecture.md
 - **Sprint Plan:** docs/sprint-plan.md
+
+---
+
+## Senior Developer Review (AI)
+
+**Reviewer:** Roy  
+**Date:** 2025-12-10  
+**Outcome:** **Changes Requested** ⚠️
+
+### Summary
+
+The Google OAuth integration is **functionally complete and well-coded**, with professional error handling, type safety, and good separation of concerns. However, the implementation has **three medium-severity issues** that deviate from acceptance criteria and security requirements:
+
+1. **Token refresh logic incomplete** - Only detects expiration, doesn't actually refresh tokens
+2. **Token storage security concern** - Uses localStorage instead of httpOnly cookies as specified
+3. **Frontend tests missing** - Task marked complete but no React tests exist
+
+The code quality is excellent with proper async patterns, comprehensive docstrings, and clean architecture. All OAuth endpoints are functional and backend tests are thorough. These issues are addressable enhancements rather than blockers.
+
+### Key Findings
+
+#### **MEDIUM Severity**
+
+1. **[AC 1.3.2] Token Refresh Not Fully Implemented**
+   - **Issue:** AC requires "Token refresh logic implemented" but implementation only detects expiration and clears token, requiring full re-authentication
+   - **Evidence:** `frontend/src/hooks/useAuth.ts:75-88` - `refreshToken()` function only clears token, doesn't obtain new token
+   - **Impact:** Poor UX - users must manually sign in again instead of seamless refresh
+   - **Recommendation:** Implement actual token refresh (either refresh token endpoint or silent re-auth)
+
+2. **[AC 1.3.3] Security Deviation: localStorage Instead of httpOnly Cookies**
+   - **Issue:** AC 1.3.3 explicitly requires "Token stored securely (httpOnly cookie)" but implementation uses localStorage
+   - **Architecture Evidence:** `docs/architecture.md:176, 236-280` emphasizes httpOnly cookies for XSS protection
+   - **Evidence:** `frontend/src/hooks/useAuth.ts:48-51` - Token stored in localStorage
+   - **Impact:** Token vulnerable to XSS attacks (localStorage accessible to JavaScript)
+   - **Recommendation:** Implement httpOnly cookie storage via backend Set-Cookie header
+
+3. **[Task 6] Frontend Tests Missing**
+   - **Issue:** Task 6 marked complete with all subtasks checked, but no frontend tests exist
+   - **Evidence:** No test files found for `useAuth` hook, `SignIn` component, or `AuthCallback` page
+   - **Impact:** OAuth flow not validated with automated tests
+   - **Recommendation:** Add React Testing Library tests for auth components
+
+#### **LOW Severity**
+
+1. **Library Substitution Documented**
+   - **Issue:** better-auth library not used as specified (not available for Python)
+   - **Mitigation:** Well-documented in Dev Notes; google-auth + python-jose are production-grade alternatives
+   - **Impact:** Minimal - alternative libraries are industry-standard
+
+### Acceptance Criteria Coverage
+
+| AC # | Description | Status | Evidence |
+|------|-------------|--------|----------|
+| **AC 1.3.1** | Google OAuth Credentials | ✅ IMPLEMENTED | `backend/app/config.py:32-33` - Config ready<br>`backend/app/routers/auth.py:131` - Redirect URI set |
+| **AC 1.3.2** | Backend OAuth Setup | ⚠️ PARTIAL | `backend/app/routers/auth.py:110-219` - OAuth endpoints<br>`backend/app/routers/auth.py:31-56` - JWT token creation<br>**CONCERN:** Token refresh only clears, doesn't refresh |
+| **AC 1.3.3** | Frontend OAuth Flow | ⚠️ PARTIAL | `frontend/src/hooks/useAuth.ts` - Custom hook<br>`frontend/src/components/SignIn.tsx` - Sign-in button<br>`frontend/src/pages/AuthCallback.tsx` - Callback handler<br>**CONCERN:** localStorage used instead of httpOnly cookies |
+| **AC 1.3.4** | Protected Endpoints | ✅ IMPLEMENTED | `backend/app/middleware/auth_middleware.py:19-71` - JWT verification<br>`backend/app/routers/auth.py:234-282` - /me endpoint |
+| **AC 1.3.5** | Sign Out & Session Management | ⚠️ PARTIAL | `backend/app/routers/auth.py:222-231` - Logout endpoint<br>`frontend/src/hooks/useAuth.ts:193-209` - signOut()<br>**CONCERN:** Automatic refresh missing |
+
+**Summary:** 2 of 5 acceptance criteria fully implemented, 3 of 5 partially implemented with deviations
+
+### Task Completion Validation
+
+| Task | Marked As | Verified As | Evidence |
+|------|-----------|-------------|----------|
+| **Task 1: Register OAuth App** | ⏸️ Incomplete | ✅ CORRECT | Config ready, awaits user action |
+| **Task 2: Configure Backend** | ✅ Complete | ✅ VERIFIED | All backend OAuth code implemented |
+| **Task 3: Frontend OAuth** | ✅ Complete | ✅ VERIFIED | Hook, components, callback all working |
+| **Task 4: Auth Middleware** | ✅ Complete | ✅ VERIFIED | Middleware and protected endpoints functional |
+| **Task 5: Session Persistence** | ✅ Complete | ✅ VERIFIED | Token persistence and expiration detection working |
+| **Task 6: Write Tests** | ✅ Complete | ⚠️ QUESTIONABLE | Backend tests exist, **frontend tests missing** |
+
+**Summary:** 5 of 6 tasks verified complete, 1 task questionable (tests incomplete)
+
+### Test Coverage and Gaps
+
+**✅ Backend Tests Complete:**
+- OAuth initiation: `backend/tests/test_auth.py:54-71`
+- Token generation/validation: `backend/tests/test_auth.py:182-204`
+- Protected endpoint security: `backend/tests/test_auth.py:130-169`
+- Logout flow: `backend/tests/test_auth.py:171-179`
+
+**❌ Frontend Tests Missing:**
+- No tests for `useAuth` hook
+- No tests for `SignIn` component
+- No tests for `AuthCallback` page
+- No integration tests for OAuth flow
+
+**Gap:** Frontend OAuth flow completely untested despite Task 6 being marked complete.
+
+### Architectural Alignment
+
+**✅ Aligned:**
+- Python 3.11, FastAPI framework per Epic 1 tech stack
+- JWT token authentication
+- Async patterns throughout
+- Clean separation of concerns (routers, middleware, schemas)
+- OpenTelemetry integration present
+- CORS configured correctly
+
+**⚠️ Deviations:**
+- **Architecture document (lines 176, 236-280)** specifies httpOnly cookies for security, but localStorage used
+- **Epic 1 tech stack** specifies better-auth library, but unavailable for Python (acceptable substitution)
+- Token refresh mechanism incomplete (detects but doesn't refresh)
+
+### Security Notes
+
+**✅ Good Security Practices:**
+- JWT tokens properly signed with secret key
+- Google ID token verification implemented
+- Token expiration enforced and checked
+- CORS configured for development environments
+- Credentials stored in environment variables (not hardcoded)
+- Pydantic validation for user data
+- Async database operations prevent SQL injection
+
+**⚠️ Security Concerns:**
+1. **Token Storage (MEDIUM):** localStorage vulnerable to XSS attacks - httpOnly cookies required per AC
+2. **JWT Secret (INFO):** Default secret is `"dev_secret_change_in_production"` - must change in production
+3. **No Token Blacklist (INFO):** Logout only clears client-side; consider Redis-based token blacklist for production
+4. **CSRF Protection (INFO):** State parameter generated but not validated in callback (OAuth best practice)
+
+### Best-Practices and References
+
+**Tech Stack:**
+- **Backend:** Python 3.11, FastAPI 0.104.1, google-auth 2.25.2, python-jose 3.3.0
+- **Frontend:** React 18.2, TypeScript 5.9.3, Vite 7.2.2
+- **Authentication:** Custom OAuth implementation (google-auth + python-jose)
+
+**References:**
+- [Google OAuth 2.0 Documentation](https://developers.google.com/identity/protocols/oauth2)
+- [FastAPI Security](https://fastapi.tiangolo.com/tutorial/security/)
+- [OWASP JWT Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html)
+- [httpOnly Cookie Security](https://owasp.org/www-community/HttpOnly)
+
+### Action Items
+
+**Code Changes Required:**
+- [ ] [Medium] Implement actual token refresh logic instead of just expiration detection (AC #1.3.2) [file: frontend/src/hooks/useAuth.ts:75-88]
+- [ ] [Medium] Migrate token storage from localStorage to httpOnly cookies (AC #1.3.3) [file: frontend/src/hooks/useAuth.ts:48-51, backend needs Set-Cookie]
+- [ ] [Medium] Add frontend tests for OAuth flow (Task #6) [file: frontend/src/__tests__/useAuth.test.ts (create)]
+- [ ] [Low] Validate OAuth state parameter in callback for CSRF protection [file: backend/app/routers/auth.py:143]
+
+**Advisory Notes:**
+- Note: better-auth library substitution is acceptable and well-documented
+- Note: Change JWT secret before production deployment (currently using dev default)
+- Note: Consider implementing Redis-based token blacklist for logout in production
+- Note: Task 1 requires user action (Google Cloud Console setup) - configuration is ready
+
+---
+
+## Change Log
+
+### Version 1.1 - Senior Developer Review (2025-12-10)
+- Senior Developer Review notes appended
+- Status remains "review" pending resolution of medium-severity findings
+- Three medium-severity issues identified requiring code changes
+- All backend implementation verified and functional
+- Frontend implementation verified but with security and testing gaps
 

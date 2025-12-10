@@ -118,7 +118,7 @@ async def translate_blocks_sync(
             # Initialize translation service
             translation_service = TranslationService()
             
-            # Translate blocks with batch processing
+            # Translate blocks with batch processing and progress tracking
             info(
                 "Starting batch translation",
                 job_id=job_id,
@@ -126,6 +126,10 @@ async def translate_blocks_sync(
                 source_lang=translation.source_language,
                 target_lang=translation.target_language,
             )
+            
+            # Update Redis progress data
+            total_blocks = len(blocks)
+            await _update_translation_progress(redis, job_id, 0, total_blocks)
             
             translated_blocks, translation_cost = await translation_service.batch_translate(
                 blocks=blocks,
@@ -136,6 +140,9 @@ async def translate_blocks_sync(
             # Update progress
             translation.progress_percent = 90
             await db.commit()
+            
+            # Final progress update
+            await _update_translation_progress(redis, job_id, total_blocks, total_blocks)
             
             # Store translated blocks in Redis cache
             # Format: {translation_id}_translated
@@ -244,3 +251,31 @@ async def get_translated_blocks_from_cache(
     cache_key = f"{CacheKeys.blocks(job_id)}_translated"
     
     return await cache.get_json(cache_key)
+
+
+async def _update_translation_progress(
+    redis,
+    job_id: str,
+    translated_blocks: int,
+    total_blocks: int,
+) -> None:
+    """
+    Update translation progress in Redis for status polling.
+    
+    Args:
+        redis: Redis client
+        job_id: Translation job ID
+        translated_blocks: Number of blocks translated so far
+        total_blocks: Total number of blocks to translate
+    """
+    cache = Cache(redis)
+    progress_key = CacheKeys.job_progress(job_id)
+    
+    progress_data = {
+        "stage": "translation",
+        "translated_blocks": translated_blocks,
+        "total_blocks": total_blocks,
+        "progress_percent": int((translated_blocks / total_blocks) * 100) if total_blocks > 0 else 0,
+    }
+    
+    await cache.set_json(progress_key, progress_data, expire_seconds=3600)
