@@ -17,7 +17,7 @@ _s3_config = Config(
     retries={"max_attempts": 3, "mode": "standard"},
 )
 
-# Create S3 client (works with both AWS S3 and MinIO)
+# Create S3 client for backend operations (uses internal endpoint)
 s3_client = boto3.client(
     "s3",
     endpoint_url=settings.s3_endpoint_url,  # None for real AWS S3
@@ -25,6 +25,20 @@ s3_client = boto3.client(
     aws_secret_access_key=settings.aws_secret_access_key,
     region_name=settings.aws_region,
     config=_s3_config,
+)
+
+# Create separate client for presigned URL generation (uses public endpoint)
+_s3_public_config = Config(
+    signature_version="s3v4",
+    s3={"addressing_style": "path"},
+)
+s3_public_client = boto3.client(
+    "s3",
+    endpoint_url=settings.s3_public_url,
+    aws_access_key_id=settings.aws_access_key_id,
+    aws_secret_access_key=settings.aws_secret_access_key,
+    region_name=settings.aws_region,
+    config=_s3_public_config,
 )
 
 # Default bucket name
@@ -137,6 +151,7 @@ def get_presigned_url(
 ) -> str:
     """
     Generate a presigned URL for temporary access.
+    Uses the public-facing S3 endpoint for browser compatibility.
     
     Args:
         key: S3 object key (path)
@@ -147,7 +162,7 @@ def get_presigned_url(
     Returns:
         Presigned URL string
     """
-    return s3_client.generate_presigned_url(
+    return s3_public_client.generate_presigned_url(
         method,
         Params={"Bucket": bucket, "Key": key},
         ExpiresIn=expires_in,
@@ -162,6 +177,7 @@ def get_presigned_download_url(
 ) -> str:
     """
     Generate a presigned URL for downloading with optional filename.
+    Uses the public-facing S3 endpoint for browser compatibility.
     
     Args:
         key: S3 object key (path)
@@ -176,7 +192,7 @@ def get_presigned_download_url(
     if filename:
         params["ResponseContentDisposition"] = f'attachment; filename="{filename}"'
 
-    return s3_client.generate_presigned_url(
+    return s3_public_client.generate_presigned_url(
         "get_object",
         Params=params,
         ExpiresIn=expires_in,

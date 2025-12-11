@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     aws_region: str = "us-east-1"
     aws_bucket_name: str = "transkeep-files"
     s3_endpoint_url: str | None = "http://localhost:9000"  # None for real AWS S3
+    # Frontend-accessible S3 URL (for browser presigned URL generation)
+    s3_public_url: str = "http://localhost:9000"
 
     # Authentication
     jwt_secret: str = "dev_secret_change_in_production"

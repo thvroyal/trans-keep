@@ -38,6 +38,18 @@ class Block:
 
 
 @dataclass
+class TranslatedBlock:
+    """
+    A text block with its translation.
+    
+    Contains the original block information and translated text
+    for PDF reconstruction.
+    """
+    original: Block  # Original extracted block
+    translated_text: str  # Translated text content
+
+
+@dataclass
 class PDFExtractionResult:
     """
     Complete result of PDF text extraction.
