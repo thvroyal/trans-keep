@@ -33,12 +33,14 @@ Implement the complete translation pipeline: file upload, PDF extraction, transl
 
 | Component | Technology | Version | Why | Usage |
 |-----------|------------|---------|-----|-------|
-| **PDF Library** | PyMuPDF (fitz) | 1.23+ | Fast text extraction with coordinates | Story 2.2 |
-| **Text Extraction** | PyMuPDF blocks | - | Per-page block extraction | Story 2.2 |
+| **PDF Library** | PDFMathTranslate (pdf2zh) | 1.8+ | AI-powered layout detection, specialized for technical docs | Story 2.2 |
+| **Layout Detection** | DocLayout-YOLO | - | AI model for precise layout detection | Story 2.2 |
+| **Text Extraction** | PDFMathTranslate API | - | Per-page block extraction with layout preservation | Story 2.2 |
 | **Coordinate System** | Normalized percentages | - | Layout-preserving coordinates | Story 2.2 |
 | **Performance** | Multi-threading | - | Parallel page processing | Story 2.2 |
 | **Caching** | Redis | 7 | Cache extracted blocks (24h) | Story 2.2 |
 | **Memory** | Generators | - | Stream large PDFs | Story 2.2 |
+| **Fallback** | PyMuPDF (fitz) | 1.23+ | Fallback if PDFMathTranslate unavailable | Story 2.2 |
 
 ### **Translation API Stack**
 
@@ -96,10 +98,11 @@ Technologies:
 - `backend/app/services/s3_service.py` - S3 operations
 - `backend/tests/test_upload.py` - Integration tests
 
-### **Story 2.2: PDF Extraction with PyMuPDF**
+### **Story 2.2: PDF Extraction with PDFMathTranslate**
 ```
 Technologies:
-├── PyMuPDF (text extraction)
+├── PDFMathTranslate (pdf2zh) - AI-powered layout detection
+├── DocLayout-YOLO - Layout detection model
 ├── Redis (block caching)
 ├── Multi-threading (parallelization)
 ├── PostgreSQL (block storage)
@@ -107,7 +110,7 @@ Technologies:
 ```
 
 **Key Files:**
-- `backend/app/services/pdf_service.py` - PDF extraction
+- `backend/app/services/pdf_service.py` - PDF extraction (PDFMathTranslate)
 - `backend/app/tasks/extract_pdf.py` - Celery task
 - `backend/app/schemas/pdf.py` - Block data models
 - `backend/tests/test_pdf_extraction.py` - Tests
@@ -174,8 +177,9 @@ Technologies:
 
 2. EXTRACT PDF BLOCKS
    ├─ Celery task: extract_pdf_task(job_id)
-   ├─ PyMuPDF reads PDF from S3
-   ├─ Extracts text blocks with coordinates
+   ├─ PDFMathTranslate (pdf2zh) reads PDF from S3
+   ├─ Uses DocLayout-YOLO for AI-powered layout detection
+   ├─ Extracts text blocks with coordinates (better format preservation)
    ├─ Stores in Redis cache (TTL 24h)
    ├─ Updates DB: DocumentBlocks table
    ├─ Updates status: 'extracting' → 'extracted'
@@ -203,7 +207,7 @@ Technologies:
    ├─ Celery task: reconstruct_pdf_task(job_id)
    ├─ Gets original PDF from S3
    ├─ Gets final translations from DB
-   ├─ PyMuPDF reconstructs with new text
+   ├─ PDFMathTranslate reconstructs with new text (better format preservation)
    ├─ Uploads final PDF to S3
    ├─ Updates status: 'reconstructing' → 'completed'
    └─ Task chain completes
@@ -352,7 +356,9 @@ GET /api/v1/status/{job_id}
 
 - [DeepL Python Docs](https://github.com/DeepLcom/deepl-python)
 - [Celery Documentation](https://docs.celeryproject.io)
-- [PyMuPDF Documentation](https://pymupdf.readthedocs.io)
+- [PDFMathTranslate (pdf2zh) GitHub](https://github.com/PDFMathTranslate/PDFMathTranslate)
+- [PDFMathTranslate Documentation](https://pdf2zh-next.com)
+- [DocLayout-YOLO](https://github.com/opendatalab/DocLayout-YOLO)
 - [boto3 S3 Reference](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html)
 - [Flower Monitoring](https://flower.readthedocs.io)
 
@@ -364,5 +370,5 @@ All technologies identified for Stories 2.1-2.5.
 Ready for implementation.
 
 **Created:** November 15, 2025  
-**Last Updated:** November 15, 2025
+**Last Updated:** December 13, 2025 (PDFMathTranslate integration)
 

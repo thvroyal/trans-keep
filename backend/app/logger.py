@@ -52,9 +52,30 @@ class JSONFormatter(logging.Formatter):
         
         # Add any extra fields from the record
         if hasattr(record, "extra_fields"):
-            log_entry["context"] = record.extra_fields
+            log_entry["context"] = self._sanitize_context(record.extra_fields)
         
         return json.dumps(log_entry)
+    
+    def _sanitize_context(self, context: dict) -> dict:
+        """Convert non-JSON-serializable objects to strings."""
+        sanitized = {}
+        for key, value in context.items():
+            if isinstance(value, Exception):
+                sanitized[key] = f"{type(value).__name__}: {value}"
+            elif isinstance(value, dict):
+                sanitized[key] = self._sanitize_context(value)
+            elif isinstance(value, (list, tuple)):
+                sanitized[key] = [
+                    f"{type(v).__name__}: {v}" if isinstance(v, Exception) else v
+                    for v in value
+                ]
+            else:
+                try:
+                    json.dumps(value)
+                    sanitized[key] = value
+                except (TypeError, ValueError):
+                    sanitized[key] = str(value)
+        return sanitized
 
 
 class StructuredLogger:
