@@ -146,12 +146,16 @@ class RetranslateResponse(BaseModel):
     
     translated_text: str = Field(..., description="Re-translated text")
     cost_usd: float = Field(..., description="Cost in USD")
+    degraded_mode: Optional[bool] = Field(False, description="Whether degraded mode was used")
+    degraded_message: Optional[str] = Field(None, description="Message explaining degraded mode")
     
     class Config:
         json_schema_extra = {
             "example": {
                 "translated_text": "これはテストです",
-                "cost_usd": 0.0001
+                "cost_usd": 0.0001,
+                "degraded_mode": False,
+                "degraded_message": None
             }
         }
 

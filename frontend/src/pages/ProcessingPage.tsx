@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, CheckCircle2, XCircle, FileText, Clock, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
+import { withRetry, isNetworkError, isTimeoutError, isServerError } from '@/utils/retry';
 
 interface StatusResponse {
   job_id: string;
@@ -27,7 +28,7 @@ export function ProcessingPage() {
   const navigate = useNavigate();
   const [isComplete, setIsComplete] = useState(false);
 
-  // Poll for status every 2 seconds
+  // Poll for status every 2 seconds with retry logic
   const { data: status, error, isLoading } = useQuery<StatusResponse>({
     queryKey: ['translationStatus', jobId],
     queryFn: async () => {
@@ -38,11 +39,29 @@ export function ProcessingPage() {
          throw new Error('Not authenticated');
        }
 
-      const response = await fetch(`${apiUrl}/api/v1/status/${jobId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
+      const { result: response } = await withRetry(
+        async () => {
+          const res = await fetch(`${apiUrl}/api/v1/status/${jobId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+
+          // Don't retry on 401 or 404 (these are permanent errors)
+          if (!res.ok && res.status !== 401 && res.status !== 404 && isServerError(res)) {
+            throw new Error(`Server error: ${res.status}`);
+          }
+
+          return res;
         },
-      });
+        {
+          maxAttempts: 3,
+          initialBackoffMs: 1000,
+          shouldRetry: (error) => {
+            return isNetworkError(error) || isTimeoutError(error);
+          },
+        }
+      );
 
       if (!response.ok) {
         if (response.status === 401) {

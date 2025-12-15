@@ -696,9 +696,19 @@ async def retranslate_text(
             detail=str(e),
         )
     except Exception as e:
-        log_error("Failed to re-translate", exc=e)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to re-translate text",
+        # Graceful degradation: if tone customization fails, return original text
+        warning(
+            "Tone customization failed, returning original text",
+            exc=e,
+            user_id=str(current_user.id),
+            tone=request.tone,
+        )
+        
+        # Return original text with degraded mode indicator
+        return RetranslateResponse(
+            translated_text=request.text,  # Return original text
+            cost_usd=0.0,
+            degraded_mode=True,
+            degraded_message="Tone customization temporarily unavailable. Original text returned.",
         )
 

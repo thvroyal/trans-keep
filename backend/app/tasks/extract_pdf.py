@@ -123,18 +123,21 @@ async def extract_pdf_sync(
             translation.progress_percent = 80
             await db.commit()
             
-            # Check if PDF is scanned
+            # Check if PDF is scanned - warn but don't fail
             if result.is_scanned:
-                info("Scanned PDF detected", job_id=job_id)
-                translation.status = TranslationStatus.FAILED
-                translation.error_message = "This PDF appears to be scanned (image-based). OCR support coming in Phase 2."
+                warning(
+                    "Scanned PDF detected - proceeding with limited text extraction",
+                    job_id=job_id,
+                    total_characters=result.total_characters,
+                )
+                # Store warning in translation record but continue processing
+                translation.warning_message = (
+                    "This PDF appears to be scanned (image-based). "
+                    "Limited text was extracted. For best results, use a PDF with selectable text. "
+                    "OCR support is planned for Phase 2."
+                )
                 await db.commit()
-                
-                return {
-                    "success": False,
-                    "error": "scanned_pdf",
-                    "message": "PDF is scanned and requires OCR",
-                }
+                # Continue processing with whatever text was extracted
             
             # Store metadata in translation record
             # Note: Actual block storage will be implemented when needed

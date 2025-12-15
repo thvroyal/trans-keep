@@ -140,19 +140,38 @@ async def customize_tone_sync(
                 )
                 translated_blocks.append(translated_block)
             
-            # Apply tone customization
+            # Apply tone customization with graceful degradation
             tone_service = ToneService()
-            customized_blocks, total_cost = await tone_service.batch_apply_tone(
-                blocks=translated_blocks,
-                tone=tone,
-            )
-            
-            info(
-                "Tone customization complete",
-                job_id=job_id,
-                block_count=len(customized_blocks),
-                cost_usd=f"${total_cost:.6f}",
-            )
+            try:
+                customized_blocks, total_cost = await tone_service.batch_apply_tone(
+                    blocks=translated_blocks,
+                    tone=tone,
+                )
+                
+                info(
+                    "Tone customization complete",
+                    job_id=job_id,
+                    block_count=len(customized_blocks),
+                    cost_usd=f"${total_cost:.6f}",
+                )
+            except Exception as tone_error:
+                # Graceful degradation: if tone customization fails, use original translated blocks
+                warning(
+                    "Tone customization failed, using original translations",
+                    exc=tone_error,
+                    job_id=job_id,
+                    tone=tone,
+                )
+                
+                # Use original translated blocks (no tone customization)
+                customized_blocks = translated_blocks
+                total_cost = 0.0
+                
+                # Store degraded mode indicator
+                translation.warning_message = (
+                    "Tone customization temporarily unavailable. "
+                    "Translation completed without tone adjustments."
+                )
             
             # Store tone-customized blocks in cache
             # Add tone_customized_text to existing cache structure

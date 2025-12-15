@@ -10,9 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Upload, FileText, AlertCircle } from 'lucide-react'
+import { Upload, FileText, AlertCircle, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import SignIn from '@/components/SignIn'
+import { withRetry, isNetworkError, isTimeoutError, isServerError } from '@/utils/retry'
+import { uploadFileInChunks, calculateUploadSpeed, formatUploadSpeed, formatTimeRemaining } from '@/utils/chunkedUpload'
 
 // Constants
 const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB in bytes
@@ -36,6 +38,12 @@ export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [retryAttempt, setRetryAttempt] = useState(0)
+  const [isRetrying, setIsRetrying] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadSpeed, setUploadSpeed] = useState(0)
+  const [timeRemaining, setTimeRemaining] = useState<string>('')
+  const uploadStartTime = useState<number | null>(null)
 
   const validateFile = useCallback((file: File): boolean => {
     // Check file type
@@ -121,49 +129,135 @@ export default function UploadPage() {
 
     setIsUploading(true)
     setError(null)
+    setRetryAttempt(0)
+    setIsRetrying(false)
+    setUploadProgress(0)
+    setUploadSpeed(0)
+    setTimeRemaining('')
+    const startTime = Date.now()
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('target_language', targetLanguage.toLowerCase())
-      formData.append('source_language', 'auto')
-
       const token = localStorage.getItem('access_token')
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-      const response = await fetch(`${apiUrl}/api/v1/upload`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      })
+      // Use chunked upload for files larger than 10MB
+      const useChunkedUpload = file.size > 10 * 1024 * 1024
 
-      if (response.ok) {
-        const data = await response.json()
-        toast.success('Upload successful!', {
-          description: 'Your document is being processed.',
-        })
-        navigate(`/processing/${data.job_id}`)
+      if (useChunkedUpload) {
+        // Chunked upload with progress tracking
+        const result = await uploadFileInChunks(
+          file,
+          `${apiUrl}/api/v1/upload`,
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          {
+            target_language: targetLanguage.toLowerCase(),
+            source_language: 'auto',
+          },
+          {
+            chunkSize: 5 * 1024 * 1024, // 5MB chunks
+            onProgress: (progress, uploadedBytes, totalBytes) => {
+              setUploadProgress(progress)
+              
+              const elapsedMs = Date.now() - startTime
+              const speed = calculateUploadSpeed(uploadedBytes, elapsedMs)
+              setUploadSpeed(speed)
+              
+              const remainingBytes = totalBytes - uploadedBytes
+              const remaining = formatTimeRemaining(remainingBytes, speed)
+              setTimeRemaining(remaining)
+            },
+          }
+        )
+
+        if (result.success && result.jobId) {
+          toast.success('Upload successful!', {
+            description: 'Your document is being processed.',
+          })
+          navigate(`/processing/${result.jobId}`)
+        } else {
+          throw new Error(result.error || 'Upload failed')
+        }
       } else {
-        const errorData = await response.json().catch(() => ({
-          detail: 'Upload failed. Please try again.',
-        }))
-        const errorMessage = errorData.detail || 'Upload failed. Please try again.'
-        setError(errorMessage)
-        toast.error('Upload failed', {
-          description: errorMessage,
-        })
+        // Standard upload for smaller files
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('target_language', targetLanguage.toLowerCase())
+        formData.append('source_language', 'auto')
+
+        const { result: response } = await withRetry(
+          async () => {
+            const res = await fetch(`${apiUrl}/api/v1/upload`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData,
+            })
+
+            // Retry on network errors or 5xx server errors
+            if (!res.ok && isServerError(res)) {
+              throw new Error(`Server error: ${res.status}`)
+            }
+
+            return res
+          },
+          {
+            maxAttempts: 3,
+            initialBackoffMs: 1000,
+            onRetry: (attempt, error) => {
+              setRetryAttempt(attempt)
+              setIsRetrying(true)
+              toast.info(`Retrying upload... (Attempt ${attempt}/3)`, {
+                description: error.message,
+              })
+            },
+            shouldRetry: (error) => {
+              return isNetworkError(error) || isTimeoutError(error)
+            },
+          }
+        )
+
+        setIsRetrying(false)
+
+        if (response.ok) {
+          const data = await response.json()
+          toast.success('Upload successful!', {
+            description: 'Your document is being processed.',
+          })
+          navigate(`/processing/${data.job_id}`)
+        } else {
+          const errorData = await response.json().catch(() => ({
+            detail: 'Upload failed. Please try again.',
+          }))
+          const errorMessage = errorData.detail || 'Upload failed. Please try again.'
+          setError(errorMessage)
+          toast.error('Upload failed', {
+            description: errorMessage,
+          })
+        }
       }
     } catch (error) {
       console.error('Upload failed:', error)
-      const errorMessage = 'Network error. Please check your connection and try again.'
+      setIsRetrying(false)
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Network error. Please check your connection and try again.'
       setError(errorMessage)
       toast.error('Upload failed', {
         description: errorMessage,
+        action: {
+          label: 'Retry',
+          onClick: handleUpload,
+        },
       })
     } finally {
       setIsUploading(false)
+      setUploadProgress(0)
+      setUploadSpeed(0)
+      setTimeRemaining('')
     }
   }
 
@@ -238,6 +332,27 @@ export default function UploadPage() {
             </div>
           )}
 
+          {isUploading && uploadProgress > 0 && (
+            <div className="mt-4 space-y-2">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Uploading...</span>
+                <span className="font-medium">{uploadProgress.toFixed(1)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-primary h-full rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              {uploadSpeed > 0 && (
+                <div className="flex justify-between items-center text-xs text-muted-foreground">
+                  <span>{formatUploadSpeed(uploadSpeed)}</span>
+                  {timeRemaining && <span>{timeRemaining} remaining</span>}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="mt-6 space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
@@ -264,7 +379,16 @@ export default function UploadPage() {
                 disabled={!file || isUploading}
                 onClick={handleUpload}
               >
-                {isUploading ? 'Uploading...' : 'Start Translation'}
+                {isRetrying ? (
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Retrying... (Attempt {retryAttempt}/3)
+                  </span>
+                ) : isUploading ? (
+                  'Uploading...'
+                ) : (
+                  'Start Translation'
+                )}
               </Button>
             ) : (
               <div className="space-y-4">
