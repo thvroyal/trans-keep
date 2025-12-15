@@ -9,8 +9,9 @@ from app.cache import Cache, CacheKeys, get_redis_client
 from app.database import get_db
 from app.logger import error as log_error, info
 from app.models.translation import Translation, TranslationStatus
+from app.schemas.pdf import Block, Coordinates
 from app.services.tone_service import ToneService
-from app.services.translation_service import TranslatedBlock, Block, Coordinates
+from app.services.translation_service import TranslatedBlock
 
 
 @celery_app.task(
