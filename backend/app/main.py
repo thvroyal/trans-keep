@@ -15,6 +15,7 @@ from app.routers.auth import router as auth_router
 from app.routers.upload import router as upload_router
 from app.routers.status import router as status_router
 from app.routers.translation import router as translation_router
+from app.routers.download import router as download_router
 from app.s3 import create_bucket_if_not_exists
 from app.otel_config import init_telemetry, instrument_app
 from app.logger import info, error
@@ -78,6 +79,7 @@ app.include_router(auth_router)
 app.include_router(upload_router)
 app.include_router(status_router)
 app.include_router(translation_router)
+app.include_router(download_router)
 
 
 @app.get("/")

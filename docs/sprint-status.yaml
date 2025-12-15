@@ -61,9 +61,9 @@ development_status:
   # EPIC 3: UI Polish & Refinement ✨
   epic-3: contexted
   3-1-side-by-side-review: review
-  3-2-tone-customization: ready-for-dev
-  3-3-edit-alternatives: ready-for-dev
-  3-4-pdf-download: ready-for-dev
+  3-2-tone-customization: review
+  3-3-edit-alternatives: review
+  3-4-pdf-download: review
   3-5-error-handling: ready-for-dev
   epic-3-retrospective: optional
 
